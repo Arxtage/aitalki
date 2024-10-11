@@ -1,5 +1,6 @@
 import google.generativeai as genai
 from google.cloud import texttospeech
+from utils.prompts import CALIFORNIAN_ENGLISH_PROMPT
 import os
 import pathlib
 
@@ -15,7 +16,7 @@ model = genai.GenerativeModel('models/gemini-1.5-flash')
 # print(response.text)
 
 # Create the prompt.
-prompt = "You are a helpful assistant proficient in english. THis is an 1 hour lesson. You act as a teacher like on italki.com. You should check the audio of your student and give feedback on english fluency and how to improve it. You should focus on making it fluent in American Californian English. After each feedback you should ask student to repeat the corrected part, and once he does correctly - you should continue with the conversation."
+prompt = CALIFORNIAN_ENGLISH_PROMPT
 
 # Load the samplesmall.mp3 file into a Python Blob object containing the audio
 # file's bytes and then pass the prompt and the audio to Gemini.
@@ -23,7 +24,7 @@ gemini_response = model.generate_content([
     prompt,
     {
         "mime_type": "audio/mp3",
-        "data": pathlib.Path('./media/1min20sec_conversation.mp3').read_bytes()
+        "data": pathlib.Path('./media/m5_audio.mp3').read_bytes()
     }
 ])
 
@@ -49,4 +50,4 @@ response = tts_client.synthesize_speech(
 with open("./media/output.mp3", "wb") as out:
     # Write the response to the output file.
     out.write(response.audio_content)
-    print('Audio content written to file "output.mp3"')
+    print('Audio content written to file "full_presentation_feedback.mp3"')
