@@ -34,7 +34,7 @@ print(gemini_response.text)
 tts_client = texttospeech.TextToSpeechClient()
 
 voice = texttospeech.VoiceSelectionParams(
-    language_code="en-US", ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
+    language_code="en-US", name="en-US-Casual-K", ssml_gender=texttospeech.SsmlVoiceGender.MALE
 )
 
 audio_config = texttospeech.AudioConfig(
