@@ -1,6 +1,7 @@
 import google.generativeai as genai
 from google.cloud import texttospeech
 from utils.prompts import CALIFORNIAN_ENGLISH_PROMPT
+from utils.strip_markdown import strip_markdown
 import os
 import pathlib
 
@@ -11,15 +12,10 @@ load_dotenv()
 
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
-model = genai.GenerativeModel('models/gemini-1.5-flash')
-# response = model.generate_content("Hello World! What is the meaning of Life by Hitchhikers Guide to the Galaxy? Give me Shortest Answer Possible.")
-# print(response.text)
+model = genai.GenerativeModel('models/gemini-1.5-pro')
 
-# Create the prompt.
 prompt = CALIFORNIAN_ENGLISH_PROMPT
 
-# Load the samplesmall.mp3 file into a Python Blob object containing the audio
-# file's bytes and then pass the prompt and the audio to Gemini.
 gemini_response = model.generate_content([
     prompt,
     {
@@ -29,7 +25,8 @@ gemini_response = model.generate_content([
 ])
 
 # Output Gemini's response to the prompt and the inline audio.
-print(gemini_response.text)
+gemini_response_text = strip_markdown(gemini_response.text)
+print(gemini_response_text)
 
 
 tts_client = texttospeech.TextToSpeechClient()
@@ -41,7 +38,7 @@ voice = texttospeech.VoiceSelectionParams(
 audio_config = texttospeech.AudioConfig(
     audio_encoding=texttospeech.AudioEncoding.MP3
 )
-synthesis_input = texttospeech.SynthesisInput(text=gemini_response.text)
+synthesis_input = texttospeech.SynthesisInput(text=gemini_response_text)
 
 response = tts_client.synthesize_speech(
     input=synthesis_input, voice=voice, audio_config=audio_config
