@@ -25,6 +25,7 @@ gemini_response = model.generate_content([
 ])
 
 # Output Gemini's response to the prompt and the inline audio.
+print(gemini_response.text)
 gemini_response_text = strip_markdown(gemini_response.text)
 print(gemini_response_text)
 
@@ -47,4 +48,4 @@ response = tts_client.synthesize_speech(
 with open("./media/output.mp3", "wb") as out:
     # Write the response to the output file.
     out.write(response.audio_content)
-    print('Audio content written to file "full_presentation_feedback.mp3"')
+    print('Audio content written to file "output.mp3"')
