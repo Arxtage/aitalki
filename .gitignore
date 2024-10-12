@@ -1,4 +1,4 @@
 .history
 .env
-media/*
+backend/media/*
 __pycache__/

@@ -1,51 +1,38 @@
-import google.generativeai as genai
-from google.cloud import texttospeech
-from utils.prompts import CALIFORNIAN_ENGLISH_PROMPT
-from utils.strip_markdown import strip_markdown
-import os
-import pathlib
-
 from dotenv import load_dotenv
+from services.audio_capture import capture_audio
+from services.gemini import call_gemini
+from services.text_to_speech import text_to_speech
+from utils.conversation_manager import ConversationManager
 
-# Load environment variables
+
 load_dotenv()
 
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+def main():
+    conversation_manager = ConversationManager()
+    
+    for _ in range(1):
+        # Capture audio
+        audio_data = capture_audio()
+        
+        # Get conversation token
+        conversation_token = conversation_manager.get_or_create_token()
+        
+        # Call Gemini
+        gemini_response = call_gemini(audio_data, conversation_token)
+        
+        # Convert response to speech
+        audio_response = text_to_speech(gemini_response)
+        
+        # Play audio response (implement this function)
+        # play_audio(audio_response)
 
-model = genai.GenerativeModel('models/gemini-1.5-pro')
+        with open("./media/output.mp3", "wb") as out:
+        # Write the response to the output file.
+            out.write(audio_response)
+            print('Audio content written to file "output.mp3"')
+        
+        # Update conversation state
+        conversation_manager.update_conversation(conversation_token, gemini_response)
 
-prompt = CALIFORNIAN_ENGLISH_PROMPT
-
-gemini_response = model.generate_content([
-    prompt,
-    {
-        "mime_type": "audio/mp3",
-        "data": pathlib.Path('./media/m5_audio.mp3').read_bytes()
-    }
-])
-
-# Output Gemini's response to the prompt and the inline audio.
-print(gemini_response.text)
-gemini_response_text = strip_markdown(gemini_response.text)
-print(gemini_response_text)
-
-
-tts_client = texttospeech.TextToSpeechClient()
-
-voice = texttospeech.VoiceSelectionParams(
-    language_code="en-US", name="en-US-Casual-K", ssml_gender=texttospeech.SsmlVoiceGender.MALE
-)
-
-audio_config = texttospeech.AudioConfig(
-    audio_encoding=texttospeech.AudioEncoding.MP3
-)
-synthesis_input = texttospeech.SynthesisInput(text=gemini_response_text)
-
-response = tts_client.synthesize_speech(
-    input=synthesis_input, voice=voice, audio_config=audio_config
-)
-
-with open("./media/output.mp3", "wb") as out:
-    # Write the response to the output file.
-    out.write(response.audio_content)
-    print('Audio content written to file "output.mp3"')
+if __name__ == "__main__":
+    main()
