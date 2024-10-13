@@ -3,6 +3,7 @@ from services.audio_capture import capture_audio
 from services.gemini import call_gemini
 from services.text_to_speech import text_to_speech
 from utils.conversation_manager import ConversationManager
+from utils.play_audio import play_audio
 
 
 load_dotenv()
@@ -24,7 +25,7 @@ def main():
         audio_response = text_to_speech(gemini_response)
         
         # Play audio response (implement this function)
-        # play_audio(audio_response)
+        play_audio(audio_response)
 
         with open("./media/output.mp3", "wb") as out:
         # Write the response to the output file.
