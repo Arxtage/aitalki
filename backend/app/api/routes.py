@@ -1,5 +1,5 @@
 from fastapi import FastAPI, File, UploadFile
-from services.audio_capture import capture_audio
+from services.capture_input import capture_audio
 from services.gemini import call_gemini
 from services.text_to_speech import text_to_speech
 

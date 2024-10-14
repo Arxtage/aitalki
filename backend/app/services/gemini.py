@@ -1,7 +1,7 @@
 import os
 import google.generativeai as genai
 
-from utils.system_prompt import CALIFORNIAN_ENGLISH_SYSTEM_PROMPT
+from utils.prompts import CALIFORNIAN_ENGLISH_SYSTEM_PROMPT
 from utils.strip_markdown import strip_markdown
 
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
@@ -9,13 +9,14 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 # Store chat sessions
 chat_sessions = {}
 
-def call_gemini(input_data: bytes | str, conversation_token: str):
+def call_gemini(input_data: bytes | str, conversation_token: str, time_signal: str = None):
     """
     Call Gemini API with audio data or text and conversation context.
     
     Args:
         input_data (bytes or str): Audio data or text to be sent to Gemini
         conversation_token (str): Token to identify the conversation
+        time_signal (str, optional): Signal to indicate time left in the lesson
     
     Returns:
         str: Gemini's response
@@ -30,37 +31,36 @@ def call_gemini(input_data: bytes | str, conversation_token: str):
 
     chat = chat_sessions[conversation_token]
 
+    # Prepare the message to send
+    message_to_send = []
+    if time_signal:
+        message_to_send.append(time_signal)  # Add the time signal if provided
+
     # Determine the type of input and send the message accordingly
     if isinstance(input_data, bytes):
         if include_system_prompt:
-            gemini_response = chat.send_message([
-                CALIFORNIAN_ENGLISH_SYSTEM_PROMPT,  # Include system prompt for audio
-                {
-                    "mime_type": "audio/mp3",
-                    "data": input_data
-                }
-            ])
+            message_to_send.append(CALIFORNIAN_ENGLISH_SYSTEM_PROMPT)
+            message_to_send.append({
+                "mime_type": "audio/mp3",
+                "data": input_data
+            })
         else:
-            gemini_response = chat.send_message([
-                {
-                    "mime_type": "audio/mp3",
-                    "data": input_data
-                }
-            ])
+            message_to_send.append({
+                "mime_type": "audio/mp3",
+                "data": input_data
+            })
     elif isinstance(input_data, str):
         if include_system_prompt:
-            gemini_response = chat.send_message([
-                CALIFORNIAN_ENGLISH_SYSTEM_PROMPT,  # Include system prompt for text
-                "User: " + input_data
-            ])
+            message_to_send.append(CALIFORNIAN_ENGLISH_SYSTEM_PROMPT)  # Include system prompt for text
+            message_to_send.append("User: " + input_data)
         else:
-            gemini_response = chat.send_message([
-                input_data  # Only include user message for text
-            ])
+            message_to_send.append(input_data)  # Only include user message for text
     else:
         raise ValueError("input_data must be either bytes (audio) or str (text)")
 
-    print(f'==== Chat History Lenght: {len(chat.history)}')
+    gemini_response = chat.send_message(message_to_send)
+
+    print(f'==== Chat History Length: {len(chat.history)}')
     # Process and return the response
     print(gemini_response.text)
     gemini_response_text = strip_markdown(gemini_response.text)
