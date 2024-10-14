@@ -2,10 +2,8 @@ from fastapi import FastAPI, File, UploadFile
 from services.audio_capture import capture_audio
 from services.gemini import call_gemini
 from services.text_to_speech import text_to_speech
-from utils.conversation_manager import ConversationManager
 
 app = FastAPI()
-conversation_manager = ConversationManager()
 
 @app.post("/chat")
 async def chat(audio: UploadFile = File(...)):

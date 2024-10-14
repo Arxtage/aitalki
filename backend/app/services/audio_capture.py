@@ -14,3 +14,6 @@ def capture_audio():
     """
     return pathlib.Path('./media/1min20sec_conversation.mp3').read_bytes()
 
+def capture_text():
+    text = input("User: ")
+    return text
