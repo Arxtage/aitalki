@@ -60,6 +60,7 @@ def call_gemini(input_data: bytes | str, conversation_token: str):
     else:
         raise ValueError("input_data must be either bytes (audio) or str (text)")
 
+    print(f'==== Chat History Lenght: {len(chat.history)}')
     # Process and return the response
     print(gemini_response.text)
     gemini_response_text = strip_markdown(gemini_response.text)
