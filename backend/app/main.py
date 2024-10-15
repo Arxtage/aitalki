@@ -18,8 +18,8 @@ def main(conversation_token: str):
 
     while time.time() < t_end:
         # Capture input
-        # data = capture_audio()
-        data = capture_text()
+        data = capture_audio()
+        # data = capture_text()
 
         remaining_time = t_end - time.time()
         if remaining_time <= 300 and not end_lesson_warning_sent:  # Less than or equal to 5 mins
