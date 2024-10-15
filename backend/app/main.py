@@ -2,7 +2,7 @@ import uuid
 import time
 
 from dotenv import load_dotenv
-from services.capture_input import capture_audio, capture_text
+from services.capture_input import capture_audio_bytes, capture_text, close_audio
 from services.gemini import call_gemini
 from services.text_to_speech import text_to_speech
 from utils.play_audio import play_audio
@@ -18,8 +18,8 @@ def main(conversation_token: str):
 
     while time.time() < t_end:
         # Capture input
-        data = capture_audio()
-        # data = capture_text()
+        data = capture_audio_bytes()  # Use the new audio capture function
+        # data = capture_text()  # Uncomment this line if you want to capture text input instead
 
         remaining_time = t_end - time.time()
         if remaining_time <= 300 and not end_lesson_warning_sent:  # Less than or equal to 5 mins
@@ -36,11 +36,12 @@ def main(conversation_token: str):
         # Play audio response (implement this function)
         play_audio(audio_response)
 
-        with open("./media/output.mp3", "wb") as out:
-            # Write the response to the output file.
-            out.write(audio_response)
-            print('Audio content written to file "output.mp3"')
-
+        # with open("./media/output.mp3", "wb") as out:
+        #     # Write the response to the output file.
+        #     out.write(audio_response)
+        #     print('Audio content written to file "output.mp3"')
+    
+    close_audio()
 
 if __name__ == "__main__":
     # main(conversation_token='1')
