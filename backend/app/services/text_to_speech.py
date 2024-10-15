@@ -23,7 +23,8 @@ def text_to_speech(text: str):
         language_code="en-US", name="en-US-Casual-K", ssml_gender=texttospeech.SsmlVoiceGender.MALE
     )
     audio_config = texttospeech.AudioConfig(
-        audio_encoding=texttospeech.AudioEncoding.MP3
+        audio_encoding=texttospeech.AudioEncoding.MP3,
+        speaking_rate=0.9
     )
     synthesis_input = texttospeech.SynthesisInput(text=text)
 

@@ -12,7 +12,7 @@ from utils.prompts import FIVE_MINUTES_LEFT_SIGNAL
 load_dotenv()
 
 def main(conversation_token: str):
-    lesson_duration = 30 * 60  # 30 mins
+    lesson_duration = 15 * 60  # 30 mins
     t_end = time.time() + lesson_duration
     end_lesson_warning_sent = False
 
