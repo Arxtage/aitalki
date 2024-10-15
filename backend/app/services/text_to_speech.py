@@ -20,11 +20,13 @@ def text_to_speech(text: str):
     tts_client = texttospeech.TextToSpeechClient()
 
     voice = texttospeech.VoiceSelectionParams(
-        language_code="en-US", name="en-US-Casual-K", ssml_gender=texttospeech.SsmlVoiceGender.MALE
+        language_code="en-US", name="en-US-Studio-Q", ssml_gender=texttospeech.SsmlVoiceGender.MALE
     )
     audio_config = texttospeech.AudioConfig(
         audio_encoding=texttospeech.AudioEncoding.MP3,
-        speaking_rate=0.9
+        speaking_rate=0.9,
+        pitch=-2.0,
+        volume_gain_db=0
     )
     synthesis_input = texttospeech.SynthesisInput(text=text)
 
