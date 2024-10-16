@@ -60,7 +60,10 @@ async def call_gemini(input_data: bytes | str, conversation_token: str, time_sig
     else:
         raise ValueError("input_data must be either bytes (audio) or str (text)")
 
-    gemini_response = await chat.send_message_async(message_to_send, stream=True)
+    gemini_response = await chat.send_message_async(message_to_send) # TODO: Add stream=True
+
+    # Ensure the response is fully resolved before accessing its attributes
+    await gemini_response.resolve()  # Wait for the response to complete
 
     print(f'==== Chat History Length: {len(chat.history)}')
     # Process and return the response
