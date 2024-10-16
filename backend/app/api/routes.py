@@ -1,9 +1,9 @@
 # BACKEND
 
 from fastapi import FastAPI, File, UploadFile
-from services.capture_input import capture_audio
-from services.gemini import call_gemini
-from services.text_to_speech import text_to_speech
+from backend.app.services.capture_input import capture_audio
+from backend.app.services.gemini import call_gemini
+from backend.app.services.text_to_speech import text_to_speech
 
 app = FastAPI()
 

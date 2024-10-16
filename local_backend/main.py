@@ -2,8 +2,14 @@
 
 import uuid
 import time
+import os
+import sys
 
 from dotenv import load_dotenv
+
+# Add the parent directory of local_backend and backend to sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from backend.app.services.capture_input import capture_audio_bytes, capture_text, close_audio
 from backend.app.services.gemini import call_gemini
 from backend.app.services.text_to_speech import text_to_speech

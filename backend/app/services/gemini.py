@@ -3,8 +3,8 @@
 import os
 import google.generativeai as genai
 
-from utils.prompts import CALIFORNIAN_ENGLISH_SYSTEM_PROMPT
-from utils.strip_markdown import strip_markdown
+from backend.app.utils.prompts import CALIFORNIAN_ENGLISH_SYSTEM_PROMPT
+from backend.app.utils.strip_markdown import strip_markdown
 
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
