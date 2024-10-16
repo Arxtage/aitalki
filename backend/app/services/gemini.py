@@ -11,7 +11,7 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 # Store chat sessions
 chat_sessions = {}
 
-def call_gemini(input_data: bytes | str, conversation_token: str, time_signal: str = None):
+async def call_gemini(input_data: bytes | str, conversation_token: str, time_signal: str = None):
     """
     Call Gemini API with audio data or text and conversation context.
     
@@ -60,7 +60,7 @@ def call_gemini(input_data: bytes | str, conversation_token: str, time_signal: s
     else:
         raise ValueError("input_data must be either bytes (audio) or str (text)")
 
-    gemini_response = chat.send_message(message_to_send, stream=True)
+    gemini_response = await chat.send_message_async(message_to_send, stream=True)
 
     print(f'==== Chat History Length: {len(chat.history)}')
     # Process and return the response

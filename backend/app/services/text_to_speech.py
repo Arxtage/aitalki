@@ -2,7 +2,7 @@
 
 from google.cloud import texttospeech
 
-def text_to_speech(text: str):
+async def text_to_speech(text: str):
     """
     Convert text to speech using Google Cloud TTS.
     
@@ -19,7 +19,7 @@ def text_to_speech(text: str):
     """
     pass
 
-    tts_client = texttospeech.TextToSpeechClient()
+    tts_client = texttospeech.TextToSpeechAsyncClient()
 
     voice = texttospeech.VoiceSelectionParams(
         language_code="en-US", name="en-US-Studio-Q", ssml_gender=texttospeech.SsmlVoiceGender.MALE
@@ -32,7 +32,7 @@ def text_to_speech(text: str):
     )
     synthesis_input = texttospeech.SynthesisInput(text=text)
 
-    response = tts_client.synthesize_speech(
+    response = await tts_client.synthesize_speech(
         input=synthesis_input, voice=voice, audio_config=audio_config
     )
 
