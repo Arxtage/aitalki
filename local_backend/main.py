@@ -19,7 +19,7 @@ from backend.app.utils.prompts import FIVE_MINUTES_LEFT_SIGNAL
 
 load_dotenv()
 
-def main(conversation_token: str):
+async def main(conversation_token: str):
     lesson_duration = 15 * 60  # 30 mins
     t_end = time.time() + lesson_duration
     end_lesson_warning_sent = False
@@ -36,10 +36,10 @@ def main(conversation_token: str):
             end_lesson_warning_sent = True  # Set the flag to True after sending the warning
         else:
             # Call Gemini without the time signal
-            gemini_response = call_gemini(data, conversation_token=conversation_token)
+            gemini_response = await call_gemini(data, conversation_token=conversation_token)
 
         # Convert response to speech
-        audio_response = text_to_speech(gemini_response)
+        audio_response = await text_to_speech(gemini_response)
 
         # Play audio response (implement this function)
         play_audio(audio_response)
