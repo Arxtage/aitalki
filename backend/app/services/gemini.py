@@ -1,3 +1,5 @@
+# BACKEND
+
 import os
 import google.generativeai as genai
 
@@ -29,7 +31,7 @@ def call_gemini(input_data: bytes | str, conversation_token: str, time_signal: s
     else:
         include_system_prompt = False  # Not the first message, do not include system prompt
 
-    chat = chat_sessions[conversation_token]
+    chat: genai.ChatSession = chat_sessions[conversation_token]
 
     # Prepare the message to send
     message_to_send = []
@@ -58,7 +60,7 @@ def call_gemini(input_data: bytes | str, conversation_token: str, time_signal: s
     else:
         raise ValueError("input_data must be either bytes (audio) or str (text)")
 
-    gemini_response = chat.send_message(message_to_send)
+    gemini_response = chat.send_message(message_to_send, stream=True)
 
     print(f'==== Chat History Length: {len(chat.history)}')
     # Process and return the response
