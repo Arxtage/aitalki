@@ -2,7 +2,7 @@
 
 import io
 import tempfile
-from playsound import playsound
+# from playsound import playsound
 
 def play_audio(audio_data):
     """
@@ -17,7 +17,7 @@ def play_audio(audio_data):
         temp_audio_path = temp_audio.name
 
     # Play the audio
-    playsound(temp_audio_path)
+    # playsound(temp_audio_path)
 
     # The temporary file will be automatically deleted when the function exits
 

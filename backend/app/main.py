@@ -14,10 +14,8 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.applications import Starlette
 from starlette.responses import RedirectResponse
 
-from backend.app.services.capture_input import capture_audio_bytes, close_audio
 from backend.app.services.gemini import call_gemini
 from backend.app.services.text_to_speech import text_to_speech
-from backend.app.utils.play_audio import play_audio
 from backend.app.utils.prompts import FIVE_MINUTES_LEFT_SIGNAL
 from backend.app.constants import MAIN_PAGE_HTML
 
@@ -44,18 +42,21 @@ oauth.register(
     }
 )
 
-class User(BaseModel):
-    email: str
-    name: str
+# class User(BaseModel):
+#     email: str
+#     name: str
 
-def get_current_user(request: Request) -> User:
-    user_info = request.session.get('user')
-    if user_info:
-        return User(email=user_info['email'], name=user_info['name'])
-    raise HTTPException(status_code=401, detail="Not authenticated")
+# # def get_current_user(request: Request) -> User:
+# #     user_info = request.session.get('user')
+# #     if user_info:
+# #         return User(email=user_info['email'], name=user_info['name'])
+# #     raise HTTPException(status_code=401, detail="Not authenticated")
 
 @app.get("/")
-async def get(current_user: User = Depends(get_current_user)):
+async def get(request: Request):
+    user = request.session.get('user')
+    if not user:
+        return RedirectResponse('/login')
     return HTMLResponse(MAIN_PAGE_HTML)
 
 @app.get("/login")
@@ -74,7 +75,10 @@ async def auth(request: Request):
 
 # New WebSocket endpoint
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, current_user: User = Depends(get_current_user)):
+async def websocket_endpoint(websocket: WebSocket, request: Request):
+    user = request.session.get('user')
+    if not user:
+        return RedirectResponse('/login')
     await websocket.accept()  # Accept the WebSocket connection
     conversation_token = uuid.uuid4().hex  # Generate a random token for the session
     lesson_duration = 15 * 60  # 15 minutes
