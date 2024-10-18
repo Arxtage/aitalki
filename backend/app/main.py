@@ -10,6 +10,8 @@ import time
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import secrets
+import jwt
+from datetime import datetime, timedelta
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.applications import Starlette
 from starlette.responses import RedirectResponse
@@ -24,6 +26,7 @@ load_dotenv()
 app = FastAPI()
 
 SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
+JWT_SECRET = os.environ.get('JWT_SECRET') or secrets.token_hex(32)
 
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
@@ -42,22 +45,34 @@ oauth.register(
     }
 )
 
-# class User(BaseModel):
-#     email: str
-#     name: str
+def create_token(user_info):
+    expiration = datetime.now(datetime.UTC) + timedelta(hours=2)  # 2-hour expiration
+    payload = {
+        'sub': user_info['email'],
+        'name': user_info['name'],
+        'exp': expiration
+    }
+    token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
+    return token
 
-# # def get_current_user(request: Request) -> User:
-# #     user_info = request.session.get('user')
-# #     if user_info:
-# #         return User(email=user_info['email'], name=user_info['name'])
-# #     raise HTTPException(status_code=401, detail="Not authenticated")
-
+def verify_token(token: str):
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    
 @app.get("/")
 async def get(request: Request):
     user = request.session.get('user')
     if not user:
         return RedirectResponse('/login')
-    return HTMLResponse(MAIN_PAGE_HTML)
+    
+    token = create_token(user)  # Create token for authenticated user
+    return HTMLResponse(MAIN_PAGE_HTML.replace('{{TOKEN}}', token))  # Pass token to the frontend
+
 
 @app.get("/login")
 async def login(request: Request):
@@ -73,31 +88,30 @@ async def auth(request: Request):
         request.session['user'] = dict(user)
     return RedirectResponse('/')
 
-# New WebSocket endpoint
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, request: Request):
-    user = request.session.get('user')
-    if not user:
-        return RedirectResponse('/login')
-    await websocket.accept()  # Accept the WebSocket connection
-    conversation_token = uuid.uuid4().hex  # Generate a random token for the session
+async def websocket_endpoint(websocket: WebSocket, token: str):
+    try:
+        user = verify_token(token)  # Verify the token
+        print(f' === WS USER: {user}')
+    except HTTPException as e:
+        await websocket.close(code=1008)  # Close with error code
+        return
+
+    await websocket.accept()
+    conversation_token = uuid.uuid4().hex
     lesson_duration = 15 * 60  # 15 minutes
     t_end = time.time() + lesson_duration
     end_lesson_warning_sent = False
 
     while time.time() < t_end:
-        data = await websocket.receive_bytes()  # Receive bytes from the client
+        data = await websocket.receive_bytes()
 
         remaining_time = t_end - time.time()
-        if remaining_time <= 300 and not end_lesson_warning_sent:  # Less than or equal to 5 mins
-            # Send a message to the LLM that 5 minutes are left
+        if remaining_time <= 300 and not end_lesson_warning_sent:
             gemini_response = await call_gemini(data, conversation_token=conversation_token, time_signal=FIVE_MINUTES_LEFT_SIGNAL)
-            end_lesson_warning_sent = True  # Set the flag to True after sending the warning
+            end_lesson_warning_sent = True
         else:
-            # Call Gemini without the time signal
             gemini_response = await call_gemini(data, conversation_token=conversation_token)
 
-        # Convert response to speech
         audio_response = await text_to_speech(gemini_response)
-
-        await websocket.send_bytes(audio_response)  # Send the audio response back to the client
+        await websocket.send_bytes(audio_response)
