@@ -1,6 +1,6 @@
 # BACKEND
 import os
-from constants import MAIN_PAGE_HTML
+
 from fastapi import FastAPI, WebSocket, Request, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordBearer
@@ -19,6 +19,7 @@ from backend.app.services.gemini import call_gemini
 from backend.app.services.text_to_speech import text_to_speech
 from backend.app.utils.play_audio import play_audio
 from backend.app.utils.prompts import FIVE_MINUTES_LEFT_SIGNAL
+from backend.app.constants import MAIN_PAGE_HTML
 
 load_dotenv()
 
