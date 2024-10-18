@@ -16,12 +16,12 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.applications import Starlette
 from starlette.responses import RedirectResponse
 
-from backend.app.services.gemini import call_gemini
-from backend.app.services.text_to_speech import text_to_speech
-from backend.app.utils.prompts import FIVE_MINUTES_LEFT_SIGNAL
-from backend.app.constants import MAIN_PAGE_HTML
+from app.services.gemini import call_gemini
+from app.services.text_to_speech import text_to_speech
+from app.utils.prompts import FIVE_MINUTES_LEFT_SIGNAL
+from app.constants import MAIN_PAGE_HTML
 
-load_dotenv()
+load_dotenv(dotenv_path='./.env')
 
 app = FastAPI()
 
