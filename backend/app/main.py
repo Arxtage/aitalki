@@ -46,7 +46,7 @@ oauth.register(
 )
 
 def create_token(user_info):
-    expiration = datetime.now(datetime.UTC) + timedelta(hours=2)  # 2-hour expiration
+    expiration =datetime.utcnow() + timedelta(hours=2)  # 2-hour expiration
     payload = {
         'sub': user_info['email'],
         'name': user_info['name'],
