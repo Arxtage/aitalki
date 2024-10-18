@@ -1,5 +1,6 @@
 # BACKEND
 import os
+from constants import MAIN_PAGE_HTML
 from fastapi import FastAPI, WebSocket, Request, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordBearer
@@ -27,6 +28,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
 
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
+# TODO: Check the Security
+# TODO: Remove localhost from allowed js in Google Cloud after deploying
 # Initialize OAuth
 oauth = OAuth()
 oauth.register(
@@ -40,60 +43,6 @@ oauth.register(
     }
 )
 
-
-html = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Audio Test</title>
-</head>
-<body>
-    <h1>WebSocket Audio Test</h1>
-    <button id="startRecording">Start Recording</button>
-    <button id="stopRecording" disabled>Stop Recording</button>
-    <audio id="audioPlayback" controls></audio>
-
-    <script>
-        let socket = new WebSocket("ws://localhost:8000/ws");
-        let mediaRecorder;
-        let audioChunks = [];
-
-        socket.onmessage = function(event) {
-            const audioPlayback = document.getElementById("audioPlayback");
-            const blob = new Blob([event.data], { type: 'audio/wav' });
-            audioPlayback.src = URL.createObjectURL(blob);
-            audioPlayback.play();
-        };
-
-        document.getElementById("startRecording").onclick = async function() {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.start();
-
-            mediaRecorder.ondataavailable = function(event) {
-                audioChunks.push(event.data);
-            };
-
-            mediaRecorder.onstop = function() {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                socket.send(audioBlob);
-                audioChunks = [];  // Reset the chunks for the next recording
-            };
-
-            document.getElementById("stopRecording").disabled = false;
-        };
-
-        document.getElementById("stopRecording").onclick = function() {
-            mediaRecorder.stop();
-            document.getElementById("stopRecording").disabled = true;
-        };
-    </script>
-</body>
-</html>
-"""
-
 class User(BaseModel):
     email: str
     name: str
@@ -106,7 +55,7 @@ def get_current_user(request: Request) -> User:
 
 @app.get("/")
 async def get(current_user: User = Depends(get_current_user)):
-    return HTMLResponse(html)
+    return HTMLResponse(MAIN_PAGE_HTML)
 
 @app.get("/login")
 async def login(request: Request):
