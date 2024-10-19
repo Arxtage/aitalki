@@ -2,3 +2,4 @@
 .env
 backend/media/*
 __pycache__/
+google-service-account-key.json
