@@ -4,6 +4,7 @@ import os
 from fastapi import FastAPI, WebSocket, Request, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.staticfiles import StaticFiles
 from authlib.integrations.starlette_client import OAuth, OAuthError
 import uuid
 import time
@@ -24,6 +25,9 @@ from app.constants import MAIN_PAGE_HTML
 load_dotenv(dotenv_path='./.env')
 
 app = FastAPI()
+
+# Serve the React static files
+# app.mount("/", StaticFiles(directory="frontend/build", html=True), name="static")
 
 SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
 JWT_SECRET = os.environ.get('JWT_SECRET') or secrets.token_hex(32)
