@@ -10,7 +10,9 @@ const WebSocketAudio: React.FC = () => {
 
     // Retrieve the token from cookies
     const token = Cookies.get('jwt_token');  // Get the token from the cookie
-    const wsUrl = `ws://localhost:8000/ws?token=${token}`;
+    console.log("==== ALL cookie:",document.cookie)
+    console.log("====== Retrieved token:", token);
+    const wsUrl = `ws://localhost:8000/ws?token=${token}`;  // Keep the WebSocket path distinct
 
     // WebSocket connection setup
     const connectWebSocket = () => {
