@@ -3,9 +3,8 @@ import os
 
 from fastapi import FastAPI, WebSocket, Request, Depends, HTTPException
 from fastapi.responses import HTMLResponse
-from fastapi.security import OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
-from authlib.integrations.starlette_client import OAuth, OAuthError
+from authlib.integrations.starlette_client import OAuth
 import uuid
 import time
 from pydantic import BaseModel
@@ -22,12 +21,12 @@ from app.services.text_to_speech import text_to_speech
 from app.utils.prompts import FIVE_MINUTES_LEFT_SIGNAL
 from app.constants import MAIN_PAGE_HTML
 
-load_dotenv(dotenv_path='./.env')
+load_dotenv(dotenv_path='.env')
 
 app = FastAPI()
 
 # Serve the React static files
-# app.mount("/", StaticFiles(directory="frontend/build", html=True), name="static")
+app.mount("/", StaticFiles(directory="frontend/build", html=True), name="static")
 
 SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
 JWT_SECRET = os.environ.get('JWT_SECRET') or secrets.token_hex(32)
@@ -50,7 +49,7 @@ oauth.register(
 )
 
 def create_token(user_info):
-    expiration =datetime.utcnow() + timedelta(hours=2)  # 2-hour expiration
+    expiration = datetime.utcnow() + timedelta(hours=2)  # 2-hour expiration
     payload = {
         'sub': user_info['email'],
         'name': user_info['name'],
@@ -75,8 +74,9 @@ async def get(request: Request):
         return RedirectResponse('/login')
     
     token = create_token(user)  # Create token for authenticated user
-    return HTMLResponse(MAIN_PAGE_HTML.replace('{{TOKEN}}', token))  # Pass token to the frontend
-
+    response = RedirectResponse(url="/")  # Redirect to the React app
+    response.set_cookie(key="jwt_token", value=token, httponly=True)  # Set the token in a cookie
+    return response
 
 @app.get("/login")
 async def login(request: Request):

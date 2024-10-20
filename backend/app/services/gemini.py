@@ -7,7 +7,7 @@ from app.utils.prompts import CALIFORNIAN_ENGLISH_SYSTEM_PROMPT
 from app.utils.strip_markdown import strip_markdown
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path='./.env')
+load_dotenv(dotenv_path='.env')
 
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 

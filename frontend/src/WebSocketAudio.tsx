@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import Cookies from 'js-cookie';
 
 const WebSocketAudio: React.FC = () => {
     const [isRecording, setIsRecording] = useState(false);
@@ -7,7 +8,8 @@ const WebSocketAudio: React.FC = () => {
     const audioChunks = useRef<Blob[]>([]);
     const socketRef = useRef<WebSocket | null>(null);
 
-    const token = "YOUR_JWT_TOKEN";  // Replace with actual token passed from backend
+    // Retrieve the token from cookies
+    const token = Cookies.get('jwt_token');  // Get the token from the cookie
     const wsUrl = `ws://localhost:8000/ws?token=${token}`;
 
     // WebSocket connection setup
