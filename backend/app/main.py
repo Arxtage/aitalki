@@ -51,7 +51,7 @@ oauth.register(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000, http://localhost:8000"],  # Replace with your allowed origins
+    allow_origins=["http://localhost:3000", "http://localhost:8000"],  # Correctly formatted list
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -85,7 +85,7 @@ async def get(request: Request):
     token = create_token(user)  # Create token for authenticated user
     response = HTMLResponse(content=open("frontend/build/index.html").read())
     print(f'== Set the token for user!!: {token}')
-    response.set_cookie(key="jwt_token", value=token, httponly=True, samesite='none')  # Set the token in a cookie
+    response.set_cookie(key="jwt_token", value=token)  # Set the token in a cookie
     return response
 
 @app.get("/login")
