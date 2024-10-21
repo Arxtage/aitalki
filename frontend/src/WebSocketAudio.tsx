@@ -6,6 +6,7 @@ const WebSocketAudio: React.FC = () => {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunks = useRef<Blob[]>([]);
     const socketRef = useRef<WebSocket | null>(null);
+    const userRecordingRef = useRef<MediaStream | null>(null);
 
     // Retrieve the token from cookies
     const token = Cookies.get('jwt_token');  // Get the token from the cookie
@@ -38,8 +39,10 @@ const WebSocketAudio: React.FC = () => {
             connectWebSocket();  // Reconnect WebSocket if not connected
         }
 
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorderRef.current = new MediaRecorder(stream);
+        // Get the media stream
+        const userRecording = await navigator.mediaDevices.getUserMedia({ audio: true });
+        userRecordingRef.current = userRecording; // Store the media stream
+        mediaRecorderRef.current = new MediaRecorder(userRecording);
         audioChunks.current = [];
 
         mediaRecorderRef.current.ondataavailable = (event) => {
@@ -60,6 +63,12 @@ const WebSocketAudio: React.FC = () => {
     const stopRecording = () => {
         mediaRecorderRef.current?.stop();
         setIsRecording(false);
+        
+        // Stop the media stream to deactivate the microphone
+        if (userRecordingRef.current) {
+            userRecordingRef.current.getTracks().forEach(track => track.stop());
+            userRecordingRef.current = null; // Clear the reference
+        }
     };
 
     return (
