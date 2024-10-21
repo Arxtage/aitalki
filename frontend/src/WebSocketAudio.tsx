@@ -3,14 +3,12 @@ import Cookies from 'js-cookie';
 
 const WebSocketAudio: React.FC = () => {
     const [isRecording, setIsRecording] = useState(false);
-    const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunks = useRef<Blob[]>([]);
     const socketRef = useRef<WebSocket | null>(null);
 
     // Retrieve the token from cookies
     const token = Cookies.get('jwt_token');  // Get the token from the cookie
-    console.log("==== ALL cookie:",document.cookie)
     console.log("====== Retrieved token:", token);
     const wsUrl = `ws://localhost:8000/ws?token=${token}`;  // Keep the WebSocket path distinct
 
@@ -21,7 +19,12 @@ const WebSocketAudio: React.FC = () => {
         socketRef.current.onmessage = (event) => {
             const audioBlob = new Blob([event.data], { type: 'audio/wav' });
             const url = URL.createObjectURL(audioBlob);
-            setAudioUrl(url);
+            
+            // Create a new Audio object and play it immediately
+            const audio = new Audio(url);
+            audio.play().catch(error => {
+                console.error("Error playing audio:", error);
+            });
         };
 
         socketRef.current.onclose = () => {
@@ -38,7 +41,7 @@ const WebSocketAudio: React.FC = () => {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         mediaRecorderRef.current = new MediaRecorder(stream);
         audioChunks.current = [];
-        
+
         mediaRecorderRef.current.ondataavailable = (event) => {
             audioChunks.current.push(event.data);
         };
@@ -64,7 +67,6 @@ const WebSocketAudio: React.FC = () => {
             <h1>WebSocket Audio Test</h1>
             <button onClick={startRecording} disabled={isRecording}>Start Recording</button>
             <button onClick={stopRecording} disabled={!isRecording}>Stop Recording</button>
-            {audioUrl && <audio controls src={audioUrl} />}
         </div>
     );
 };
