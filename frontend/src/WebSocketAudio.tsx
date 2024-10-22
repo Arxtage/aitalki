@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Cookies from 'js-cookie';
 
 const WebSocketAudio: React.FC = () => {
@@ -7,30 +7,35 @@ const WebSocketAudio: React.FC = () => {
     const audioChunks = useRef<Blob[]>([]);
     const socketRef = useRef<WebSocket | null>(null);
     const userRecordingRef = useRef<MediaStream | null>(null);
+    const [token, setToken] = useState<string | undefined>(undefined);
 
-    // Retrieve the token from cookies
-    const token = Cookies.get('jwt_token');  // Get the token from the cookie
-    console.log("====== Retrieved token:", token);
-    const wsUrl = `ws://localhost:8000/ws?token=${token}`;  // Keep the WebSocket path distinct
+    useEffect(() => {
+        const retrievedToken = Cookies.get('jwt_token');
+        setToken(retrievedToken);
+        console.log("====== Retrieved token:", retrievedToken);
+    }, []);
 
-    // WebSocket connection setup
+    const wsUrl = `ws://localhost:8000/ws?token=${token}`;
+
     const connectWebSocket = () => {
-        socketRef.current = new WebSocket(wsUrl);
+        if (token) {
+            socketRef.current = new WebSocket(wsUrl);
 
-        socketRef.current.onmessage = (event) => {
-            const audioBlob = new Blob([event.data], { type: 'audio/wav' });
-            const url = URL.createObjectURL(audioBlob);
-            
-            // Create a new Audio object and play it immediately
-            const audio = new Audio(url);
-            audio.play().catch(error => {
-                console.error("Error playing audio:", error);
-            });
-        };
+            socketRef.current.onmessage = (event) => {
+                const audioBlob = new Blob([event.data], { type: 'audio/wav' });
+                const url = URL.createObjectURL(audioBlob);
+                
+                // Create a new Audio object and play it immediately
+                const audio = new Audio(url);
+                audio.play().catch(error => {
+                    console.error("Error playing audio:", error);
+                });
+            };
 
-        socketRef.current.onclose = () => {
-            alert("WebSocket connection closed. Please log in again.");
-        };
+            socketRef.current.onclose = () => {
+                alert("WebSocket connection closed. Please log in again.");
+            };
+        }
     };
 
     // Start recording
