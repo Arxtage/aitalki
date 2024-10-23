@@ -5,7 +5,6 @@ import WebSocketAudio from './WebSocketAudio';
 const Lesson: React.FC = () => {
     return (
         <div>
-            <h1>Lesson Page</h1>
             <WebSocketAudio />
         </div>
     );
