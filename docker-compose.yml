@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend  # Path to the frontend directory
+      dockerfile: Dockerfile  # Specify the Dockerfile if named differently
+    ports:
+      - "3000:80"  # Map port 3000 on the host to port 80 in the container
+    volumes:
+      - frontend-build:/frontend/build  # Create a volume for the build directory
+
+  backend:
+    build:
+      context: ./backend  # Path to the backend directory
+      dockerfile: Dockerfile  # Specify the Dockerfile if named differently
+    ports:
+      - "8000:80"  # Map port 8000 on the host to port 80 in the container
+    volumes:
+      - frontend-build:/frontend/build  # Use the same volume for the backend
+
+volumes:
+  frontend-build:  # Define the shared volume

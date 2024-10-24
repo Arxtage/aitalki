@@ -27,7 +27,7 @@ load_dotenv(dotenv_path='.env')
 app = FastAPI()
 
 # Serve the React static files
-app.mount("/static", StaticFiles(directory="frontend/build/static", html=True), name="static")
+app.mount("/static", StaticFiles(directory="/frontend/build/static", html=True), name="static")
 
 SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
 JWT_SECRET = os.environ.get('JWT_SECRET') or secrets.token_hex(32)
