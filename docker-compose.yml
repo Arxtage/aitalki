@@ -3,21 +3,25 @@ version: '3.8'
 services:
   frontend:
     build:
-      context: ./frontend  # Path to the frontend directory
-      dockerfile: Dockerfile  # Specify the Dockerfile if named differently
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
       - "3000:80"  # Map port 3000 on the host to port 80 in the container
     volumes:
-      - frontend-build:/frontend/build  # Create a volume for the build directory
+      - frontend-build:/frontend/build  # Volume for the frontend build output
+    # command: ["sh", "-c", "npm run build && npm start"]  # Ensure build runs before serving
 
   backend:
     build:
       context: ./backend  # Path to the backend directory
-      dockerfile: Dockerfile  # Specify the Dockerfile if named differently
+      dockerfile: Dockerfile
     ports:
       - "8000:80"  # Map port 8000 on the host to port 80 in the container
     volumes:
-      - frontend-build:/frontend/build  # Use the same volume for the backend
+      - frontend-build:/frontend/build  # Mount the same volume to the backend
+    depends_on:
+      - frontend
+    command: ["sh", "-c", "while ! [ -d /frontend/build/static ]; do sleep 1; done; uvicorn app.main:app --host 0.0.0.0 --port 80"]  # Wait for static files
 
 volumes:
-  frontend-build:  # Define the shared volume
+  frontend-build:
