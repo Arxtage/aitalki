@@ -3,3 +3,4 @@
 backend/media/*
 __pycache__/
 google-service-account-key.json
+node_modules

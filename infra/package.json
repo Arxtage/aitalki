@@ -20,8 +20,9 @@
     "node": ">=18.0"
   },
   "dependencies": {
-    "@cdktf/provider-docker": "11.0.0",
+    "@cdktf/provider-docker": "^11.0.0",
     "@cdktf/provider-github": "14.3.1",
+    "@pulumi/hcloud": "^1.20.5",
     "cdktf": "^0.20.9",
     "constructs": "^10.4.2"
   },
