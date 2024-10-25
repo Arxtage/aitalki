@@ -6,10 +6,13 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:80"  # Map port 3000 on the host to port 80 in the container
+      - "3000:3000"  # Map port 3000 on the host to port 3000 in the container
     volumes:
       - frontend-build:/frontend/build  # Volume for the frontend build output
-    # command: ["sh", "-c", "npm run build && npm start"]  # Ensure build runs before serving
+    environment:
+      - CHOKIDAR_USEPOLLING=true  # Optional: Helps with file watching in some environments
+      - NODE_ENV=production  # Ensure production mode in Docker Compose
+
 
   backend:
     build:

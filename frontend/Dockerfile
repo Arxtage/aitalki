@@ -1,5 +1,5 @@
 # frontend/Dockerfile
-FROM node:16 AS build
+FROM node:16
 
 # Set the working directory for the frontend
 WORKDIR /frontend
@@ -10,14 +10,17 @@ COPY package.json package-lock.json ./
 # Install dependencies
 RUN npm install
 
+# Install `serve` globally to serve the production build
+RUN npm install -g serve
+
 # Copy the rest of the frontend code
 COPY . .
 
-# Build the React app
+# Build the React app for production
 RUN npm run build
 
-# Serve the app using a lightweight server
-FROM nginx:alpine
-COPY --from=build /frontend/build /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Expose the port that the app runs on
+EXPOSE 3000
+
+# Start the production build using `serve`
+CMD ["serve", "-s", "build", "-l", "3000"]

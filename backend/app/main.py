@@ -83,7 +83,7 @@ async def get(request: Request):
         return RedirectResponse('/login')
     
     token = create_token(user)  # Create token for authenticated user
-    response = HTMLResponse(content=open("frontend/build/index.html").read())
+    response = HTMLResponse(content=open("../frontend/build/index.html").read())
     print(f'== Set the token for user!!: {token}')
     response.set_cookie(key="jwt_token", value=token)  # Set the token in a cookie
     return response
