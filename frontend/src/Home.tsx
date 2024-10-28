@@ -8,9 +8,10 @@ const Home: React.FC = () => {
             <h1>Home Page</h1>
             <p>Welcome to the Home Page!</p>
             <Link to="/lesson">Go to Lesson Page</Link>
+            <br />
+            <Link to="/login">Go to Login Page</Link> {/* Add link to Login Page */}
         </div>
     );
 };
 
 export default Home;
-
