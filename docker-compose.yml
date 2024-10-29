@@ -10,7 +10,8 @@ services:
     volumes:
       - frontend-build:/frontend/build  # Volume for the frontend build output
     environment:
-      - CHOKIDAR_USEPOLLING=true  # Optional: Helps with file watching in some environments
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
       - NODE_ENV=production  # Ensure production mode in Docker Compose
 
 
