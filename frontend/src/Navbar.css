@@ -8,6 +8,13 @@
     height: 60px; /* Set a specific height for the navbar */
 }
 
+.Navbar-brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;  /* Remove default link underline */
+    color: inherit;  /* Inherit text color */
+}
+
 .Navbar-logo {
     height: 40px; /* Adjust the height of the logo */
     margin-right: 20px; /* Space between logo and title */
@@ -16,5 +23,11 @@
 .Navbar-title {
     font-size: 1.5rem; /* Adjust the font size as needed */
     color: #333; /* Set the text color */
+    margin: 0;  /* Remove default margin */
 }
+
+/* Optional: Add hover effect */
+/* .Navbar-brand:hover {
+    opacity: 0.8;
+} */
 

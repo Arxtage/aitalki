@@ -8,7 +8,7 @@ const Login: React.FC = () => {
     return (
         <div>
             <h1>Login Page</h1>
-            <button onClick={handleLogin}>Login with Google</button>
+            <button onClick={handleLogin}>Google Login</button>
         </div>
     );
 };
