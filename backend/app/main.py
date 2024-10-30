@@ -2,8 +2,6 @@
 import os
 
 from fastapi import FastAPI, WebSocket, Request, Depends, HTTPException
-from fastapi.responses import HTMLResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
 from authlib.integrations.starlette_client import OAuth
 import uuid
 import time
@@ -20,14 +18,10 @@ from starlette.responses import RedirectResponse
 from app.services.gemini import call_gemini
 from app.services.text_to_speech import text_to_speech
 from app.utils.prompts import FIVE_MINUTES_LEFT_SIGNAL
-from app.constants import MAIN_PAGE_HTML
 
 load_dotenv(dotenv_path='.env')
 
 app = FastAPI()
-
-# Serve the React static files from the shared volume
-app.mount("/static", StaticFiles(directory="/frontend/build/static"), name="static")
 
 SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
 JWT_SECRET = os.environ.get('JWT_SECRET') or secrets.token_hex(32)
@@ -45,13 +39,13 @@ oauth.register(
     client_secret=os.environ['GOOGLE_AUTH_CLIENT_SECRET'],
     client_kwargs={
         'scope': 'email openid profile',
-        'redirect_url': 'http://localhost:8000/auth'
+        'redirect_url': 'http://localhost:3000/auth'
     }
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:8000"],  # Correctly formatted list
+    allow_origins=["http://localhost:3000"],  # Only React frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -75,22 +69,18 @@ def verify_token(token: str):
         raise HTTPException(status_code=401, detail="Token expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
-    
-@app.get("/")
-async def get(request: Request):
+
+@app.get("/user")
+async def get_user(request: Request):
     user = request.session.get('user')
     if not user:
-        return RedirectResponse('/login')
-    
-    token = create_token(user)  # Create token for authenticated user
-    response = HTMLResponse(content=open("../frontend/build/index.html").read())
-    print(f'== Set the token for user!!: {token}')
-    response.set_cookie(key="jwt_token", value=token)  # Set the token in a cookie
-    return response
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    token = create_token(user)
+    return {"user": user, "token": token}
 
 @app.get("/login")
 async def login(request: Request):
-    print(f'== LOGIN ENDPOINT ENTERED')
+    print(f'== Entered Login')
     redirect_uri = request.url_for('auth')
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
@@ -98,34 +88,21 @@ async def login(request: Request):
 async def auth(request: Request):
     token = await oauth.google.authorize_access_token(request)
     user = token.get('userinfo')
-    print(f'== AUTH ENDPOINT ENTERED')
     if user:
         request.session['user'] = dict(user)
-    return RedirectResponse('/')
-
-@app.get("/{full_path:path}")
-async def catch_all(full_path: str, request: Request):
-    user = request.session.get('user')
-    if not user:
-        return RedirectResponse('/login')
-
-    token = create_token(user)
-    response = FileResponse("frontend/build/index.html")
-    response.set_cookie(key="jwt_token", value=token, httponly=True)  # Set token in a cookie
-    return response
-
-# TODO: find a better way to pack these static files. Can not mount at root (/) as breaks WS endpoint as not http.
-@app.get("/manifest.json", response_class=FileResponse)
-async def manifest():
-    return "frontend/build/manifest.json"
-
-@app.get("/favicon.ico")
-async def favicon():
-    return FileResponse("frontend/build/favicon.ico")
-
-@app.get("/logo192.png")
-async def logo():
-    return FileResponse("frontend/build/logo192.png")
+        jwt_token = create_token(dict(user))
+        response = RedirectResponse(url="http://localhost:3000/lesson")
+        # Set the cookie on the response
+        print(f' ==== Set new cookie for user: {jwt_token}')
+        response.set_cookie(
+            key="jwt_token",
+            value=jwt_token,
+            httponly=False,
+            samesite="None",
+            secure=False  # False for local development; set True in production over HTTPS
+        )
+        return response
+    raise HTTPException(status_code=401, detail="Authentication failed")
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, token: str):

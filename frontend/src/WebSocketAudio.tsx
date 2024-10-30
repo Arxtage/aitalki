@@ -8,6 +8,7 @@ const WebSocketAudio: React.FC = () => {
     const socketRef = useRef<WebSocket | null>(null);
     const userRecordingRef = useRef<MediaStream | null>(null);
     const [token, setToken] = useState<string | undefined>(undefined);
+    console.log("=== Entered WebSocketAudio");
 
     useEffect(() => {
         const retrievedToken = Cookies.get('jwt_token');
@@ -15,23 +16,27 @@ const WebSocketAudio: React.FC = () => {
         console.log("====== Retrieved token:", retrievedToken);
     }, []);
 
-    const wsUrl = `ws://localhost:8000/ws?token=${token}`;
+    useEffect(() => {
+        if (token) {
+            connectWebSocket();
+        }
+    }, [token]);  // Run only when token is set
 
     const connectWebSocket = () => {
         if (token) {
+            console.log("=== Token exists:", token)
+            const wsUrl = `ws://localhost:8000/ws?token=${token}`;  // Create wsUrl with token after it's set
             socketRef.current = new WebSocket(wsUrl);
-
+    
             socketRef.current.onmessage = (event) => {
                 const audioBlob = new Blob([event.data], { type: 'audio/wav' });
                 const url = URL.createObjectURL(audioBlob);
-                
-                // Create a new Audio object and play it immediately
                 const audio = new Audio(url);
                 audio.play().catch(error => {
                     console.error("Error playing audio:", error);
                 });
             };
-
+    
             socketRef.current.onclose = () => {
                 alert("WebSocket connection closed. Please log in again.");
             };
@@ -40,6 +45,7 @@ const WebSocketAudio: React.FC = () => {
 
     // Start recording
     const startRecording = async () => {
+        console.log("=== Start Recording")
         if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
             connectWebSocket();  // Reconnect WebSocket if not connected
         }
@@ -57,6 +63,7 @@ const WebSocketAudio: React.FC = () => {
         mediaRecorderRef.current.onstop = () => {
             const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
             socketRef.current?.send(audioBlob);  // Send the audio to backend
+            console.log("=== Sending audio over socket")
             audioChunks.current = [];
         };
 
@@ -66,6 +73,7 @@ const WebSocketAudio: React.FC = () => {
 
     // Stop recording
     const stopRecording = () => {
+        console.log("=== Stop Recording")
         mediaRecorderRef.current?.stop();
         setIsRecording(false);
         

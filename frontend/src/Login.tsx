@@ -2,7 +2,7 @@ import React from 'react';
 
 const Login: React.FC = () => {
     const handleLogin = () => {
-        window.location.href = 'http://localhost:8000/login'; // Redirect to FastAPI login
+        window.location.href = 'http://localhost:8000/login';
     };
 
     return (
