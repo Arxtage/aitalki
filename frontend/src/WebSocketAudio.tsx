@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Cookies from 'js-cookie';
+import './Common.css';
 
 const isProd = process.env.REACT_APP_STAGE === 'prod';
 const API_URL = isProd
@@ -91,10 +92,24 @@ const WebSocketAudio: React.FC = () => {
     };
 
     return (
-        <div className="audio-test">
+        <div className="container">
             <h1>Lesson</h1>
-            <button onClick={startRecording} disabled={isRecording}>Start Recording</button>
-            <button onClick={stopRecording} disabled={!isRecording}>Stop Recording</button>
+            <div className="button-container">
+                <button 
+                    className="button"
+                    onClick={startRecording} 
+                    disabled={isRecording}
+                >
+                    Start Recording
+                </button>
+                <button 
+                    className="button"
+                    onClick={stopRecording} 
+                    disabled={!isRecording}
+                >
+                    Stop Recording
+                </button>
+            </div>
         </div>
     );
 };
