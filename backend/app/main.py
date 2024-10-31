@@ -40,7 +40,7 @@ oauth.register(
     client_secret=os.environ['GOOGLE_AUTH_CLIENT_SECRET'],
     client_kwargs={
         'scope': 'email openid profile',
-        'redirect_url': 'http://localhost:3000/auth'
+        # 'redirect_url': 'http://localhost:8000/api/auth'
     }
 )
 
@@ -71,7 +71,7 @@ def verify_token(token: str):
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-@app.get("api/user")
+@app.get("/api/user")
 async def get_user(request: Request):
     user = request.session.get('user')
     if not user:
@@ -79,13 +79,13 @@ async def get_user(request: Request):
     token = create_token(user)
     return {"user": user, "token": token}
 
-@app.get("api/login")
+@app.get("/api/login")
 async def login(request: Request):
     print(f'== Entered Login')
-    redirect_uri = request.url_for('api/auth')
+    redirect_uri = request.url_for('auth')
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
-@app.get('api/auth')
+@app.get('/api/auth')
 async def auth(request: Request):
     token = await oauth.google.authorize_access_token(request)
     user = token.get('userinfo')
@@ -105,7 +105,7 @@ async def auth(request: Request):
         return response
     raise HTTPException(status_code=401, detail="Authentication failed")
 
-@app.websocket("api/ws")
+@app.websocket("/api/ws")
 async def websocket_endpoint(websocket: WebSocket, token: str):
     print(f'== WS ENDPOINT ENTERED')
     try:
