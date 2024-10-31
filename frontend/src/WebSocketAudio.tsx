@@ -1,6 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Cookies from 'js-cookie';
 
+const isProd = process.env.REACT_APP_STAGE === 'prod';
+const API_URL = isProd
+  ? 'aitalki.app'
+  : 'localhost:8000';
+
 const WebSocketAudio: React.FC = () => {
     const [isRecording, setIsRecording] = useState(false);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -25,7 +30,7 @@ const WebSocketAudio: React.FC = () => {
     const connectWebSocket = () => {
         if (token) {
             console.log("=== Token exists:", token)
-            const wsUrl = `ws://localhost:8000/ws?token=${token}`;  // Create wsUrl with token after it's set
+            const wsUrl = `ws://${API_URL}/ws?token=${token}`;  // Create wsUrl with token after it's set
             socketRef.current = new WebSocket(wsUrl);
     
             socketRef.current.onmessage = (event) => {
