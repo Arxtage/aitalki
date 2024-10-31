@@ -92,7 +92,7 @@ const WebSocketAudio: React.FC = () => {
 
     return (
         <div className="audio-test">
-            <h1>WebSocket Audio Test</h1>
+            <h1>Lesson</h1>
             <button onClick={startRecording} disabled={isRecording}>Start Recording</button>
             <button onClick={stopRecording} disabled={!isRecording}>Stop Recording</button>
         </div>

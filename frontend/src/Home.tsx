@@ -1,15 +1,29 @@
 // src/Home.tsx
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import './Home.css';
 
 const Home: React.FC = () => {
+    const navigate = useNavigate();
+
     return (
-        <div>
-            <h1>Home Page</h1>
+        <div className="home-container">
+            <h1>aitalki</h1>
             <p>Welcome to the Home Page!</p>
-            <Link to="/lesson">Go to Lesson Page</Link>
-            <br />
-            <Link to="/login">Go to Login Page</Link> {/* Add link to Login Page */}
+            <div className="button-container">
+                <button 
+                    className="nav-button"
+                    onClick={() => navigate('/lesson')}
+                >
+                    Start Lesson
+                </button>
+                <button 
+                    className="nav-button"
+                    onClick={() => navigate('/login')}
+                >
+                    Login
+                </button>
+            </div>
         </div>
     );
 };
