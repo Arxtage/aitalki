@@ -29,7 +29,7 @@ STAGE = os.environ.get('STAGE')
 
 is_prod = True if STAGE == "prod" else False
 API_URL = "https://aitalki.app" if is_prod else "http://localhost:3000"
-
+print(f'==== API_URL: {API_URL}')
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
 # TODO: Check the Security
@@ -102,7 +102,7 @@ async def auth(request: Request):
             value=jwt_token,
             httponly=False,
             samesite="None",
-            secure=False  # False for local development; set True in production over HTTPS
+            secure=True if is_prod else False  # False for local development; set True in production over HTTPS
         )
         return response
     raise HTTPException(status_code=401, detail="Authentication failed")
@@ -114,7 +114,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str):
         user = verify_token(token)  # Verify the token
         print(f' === WS USER: {user}')
     except HTTPException as e:
-        print(f"== TOKEN NOT VERIFIED: {token}")
+        print(f"== TOKEN NOT VERIFIED: {token}, error: {e}")
         await websocket.close(code=1008)  # Close with error code
         return
 

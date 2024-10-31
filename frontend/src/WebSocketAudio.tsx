@@ -30,7 +30,8 @@ const WebSocketAudio: React.FC = () => {
     const connectWebSocket = () => {
         if (token) {
             console.log("=== Token exists:", token)
-            const wsUrl = `ws://${API_URL}/api/ws?token=${token}`;  // Create wsUrl with token after it's set
+            const wsProtocol = isProd ? 'wss' : 'ws';
+            const wsUrl = `${wsProtocol}://${API_URL}/api/ws?token=${token}`;
             socketRef.current = new WebSocket(wsUrl);
     
             socketRef.current.onmessage = (event) => {
