@@ -9,7 +9,7 @@ console.log('API URL:', API_URL);
 
 const Login: React.FC = () => {
     const handleLogin = () => {
-        window.location.href = `${API_URL}/login`;
+        window.location.href = `${API_URL}/api/login`;
     };
 
     return (
