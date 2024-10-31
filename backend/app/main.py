@@ -27,6 +27,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
 JWT_SECRET = os.environ.get('JWT_SECRET') or secrets.token_hex(32)
 STAGE = os.environ.get('STAGE')
 
+is_prod = True if STAGE == "prod" else False
+API_URL = "https://aitalki.app" if is_prod else "http://localhost:3000"
+
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
 # TODO: Check the Security
@@ -40,13 +43,12 @@ oauth.register(
     client_secret=os.environ['GOOGLE_AUTH_CLIENT_SECRET'],
     client_kwargs={
         'scope': 'email openid profile',
-        # 'redirect_url': 'http://localhost:8000/api/auth'
     }
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Only React frontend
+    allow_origins=[API_URL],  # Only React frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -92,7 +94,7 @@ async def auth(request: Request):
     if user:
         request.session['user'] = dict(user)
         jwt_token = create_token(dict(user))
-        response = RedirectResponse(url="http://localhost:3000/lesson")
+        response = RedirectResponse(url=f"{API_URL}/lesson")
         # Set the cookie on the response
         print(f' ==== Set new cookie for user: {jwt_token}')
         response.set_cookie(
