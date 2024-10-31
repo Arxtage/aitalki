@@ -7,7 +7,7 @@ const Navbar: React.FC = () => {
     return (
         <nav className="Navbar">
             <Link to="/" className="Navbar-brand">
-                <img src={`${process.env.PUBLIC_URL}/logo_aitalki.png`} alt="Logo" className="Navbar-logo" />
+                <img src={`${process.env.PUBLIC_URL}/aitalkie_logo_transparent.png`} alt="Logo" className="Navbar-logo" />
                 <h1 className="Navbar-title">aitalki</h1>
             </Link>
         </nav>
