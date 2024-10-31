@@ -82,7 +82,7 @@ async def get_user(request: Request):
 @app.get("api/login")
 async def login(request: Request):
     print(f'== Entered Login')
-    redirect_uri = request.url_for('auth')
+    redirect_uri = request.url_for('api/auth')
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 @app.get('api/auth')
