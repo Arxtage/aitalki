@@ -1,29 +1,32 @@
 /* src/Navbar.css */
 .Navbar {
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    background-color: #f0f0f0; /* A bit darker than pure white */
-    padding: 10px 20px;
-    height: 60px; /* Set a specific height for the navbar */
+    background-color: #f0f0f0;
+    padding: 1rem 5%;
+    box-sizing: border-box;
 }
 
 .Navbar-brand {
     display: flex;
     align-items: center;
-    text-decoration: none;  /* Remove default link underline */
-    color: inherit;  /* Inherit text color */
+    text-decoration: none;
+    color: inherit;
 }
 
 .Navbar-logo {
-    height: 40px; /* Adjust the height of the logo */
-    margin-right: 20px; /* Space between logo and title */
+    height: auto;
+    max-height: 40px;
+    width: auto;
+    margin-right: 1rem;
 }
 
 .Navbar-title {
-    font-size: 1.5rem; /* Adjust the font size as needed */
-    color: #333; /* Set the text color */
-    margin: 0;  /* Remove default margin */
+    font-size: 1.5rem;
+    color: #333;
+    margin: 0;
 }
 
 /* Optional: Add hover effect */
