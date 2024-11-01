@@ -8,8 +8,7 @@ const Home: React.FC = () => {
 
     return (
         <div className="container">
-            <h1>aitalki</h1>
-            <p>Welcome to the Home Page!</p>
+            <h1>Become fluent in English</h1>
             <div className="button-container">
                 <button 
                     className="button"
