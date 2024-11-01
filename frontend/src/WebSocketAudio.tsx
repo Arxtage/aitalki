@@ -3,9 +3,7 @@ import Cookies from 'js-cookie';
 import './Common.css';
 
 const isProd = process.env.REACT_APP_STAGE === 'prod';
-const API_URL = isProd
-  ? 'aitalki.app'
-  : 'localhost:8000';
+const API_URL = isProd ? 'aitalki.app' : 'localhost:8000';
 
 const WebSocketAudio: React.FC = () => {
     const [isRecording, setIsRecording] = useState(false);
@@ -39,9 +37,16 @@ const WebSocketAudio: React.FC = () => {
                 const audioBlob = new Blob([event.data], { type: 'audio/wav' });
                 const url = URL.createObjectURL(audioBlob);
                 const audio = new Audio(url);
-                audio.play().catch(error => {
-                    console.error("Error playing audio:", error);
-                });
+                
+                // Play the audio with user interaction in mind
+                const playAudio = () => {
+                    audio.play().catch(error => {
+                        console.error("Error playing audio:", error);
+                    });
+                };
+
+                // Attempt playback on user interaction
+                document.addEventListener('click', playAudio, { once: true });
             };
     
             socketRef.current.onclose = () => {
