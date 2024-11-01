@@ -4,7 +4,7 @@ import os
 import google.generativeai as genai
 import logging
 
-from app.utils.prompts import CALIFORNIAN_ENGLISH_SYSTEM_PROMPT
+from app.utils.prompts import CALIFORNIAN_ENGLISH_SYSTEM_PROMPT, SIMPLE_CALIFORNIAN_ENGLISH_SYSTEM_PROMPT
 from app.utils.strip_markdown import strip_markdown
 from dotenv import load_dotenv
 
@@ -16,6 +16,8 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 chat_sessions = {}
 
 logger = logging.getLogger(__name__)
+
+SYSTEM_PROMPT = CALIFORNIAN_ENGLISH_SYSTEM_PROMPT
 
 async def call_gemini(input_data: bytes | str, conversation_token: str, time_signal: str = None):
     """
@@ -47,19 +49,21 @@ async def call_gemini(input_data: bytes | str, conversation_token: str, time_sig
     # Determine the type of input and send the message accordingly
     if isinstance(input_data, bytes):
         if include_system_prompt:
-            message_to_send.append(CALIFORNIAN_ENGLISH_SYSTEM_PROMPT)
+            message_to_send.append(SYSTEM_PROMPT)
+            message_to_send.append("Remember to respond naturally to what the student actually says, one turn at a time.")
             message_to_send.append({
                 "mime_type": "audio/mp3",
                 "data": input_data
             })
         else:
+            message_to_send.append("Respond naturally to what the student just said:")
             message_to_send.append({
                 "mime_type": "audio/mp3",
                 "data": input_data
             })
     elif isinstance(input_data, str):
         if include_system_prompt:
-            message_to_send.append(CALIFORNIAN_ENGLISH_SYSTEM_PROMPT)  # Include system prompt for text
+            message_to_send.append(SYSTEM_PROMPT)  # Include system prompt for text
             message_to_send.append("User: " + input_data)
         else:
             message_to_send.append(input_data)  # Only include user message for text
