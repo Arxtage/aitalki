@@ -128,11 +128,23 @@ async def websocket_endpoint(websocket: WebSocket, token: str):
         data = await websocket.receive_bytes()
 
         remaining_time = t_end - time.time()
+        start_gemini = time.time()
+
         if remaining_time <= 300 and not end_lesson_warning_sent:
             gemini_response = await call_gemini(data, conversation_token=conversation_token, time_signal=FIVE_MINUTES_LEFT_SIGNAL)
             end_lesson_warning_sent = True
         else:
             gemini_response = await call_gemini(data, conversation_token=conversation_token)
+            
+        gemini_duration = time.time() - start_gemini
+        print(f"=== Gemini API call took: {gemini_duration:.2f} seconds")
 
+        start_tts = time.time()
         audio_response = await text_to_speech(gemini_response)
+        tts_duration = time.time() - start_tts
+        print(f"=== Text-to-Speech took: {tts_duration:.2f} seconds")
+
+        total_duration = gemini_duration + tts_duration
+        print(f"=== Total processing time: {total_duration:.2f} seconds")
+
         await websocket.send_bytes(audio_response)

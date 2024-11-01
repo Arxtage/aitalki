@@ -34,7 +34,7 @@ async def text_to_speech(text: str):
         volume_gain_db=0
     )
     synthesis_input = texttospeech.SynthesisInput(text=text)
-
+    print(f"=== Sending teacher text to TTS")
     response = await tts_client.synthesize_speech(
         input=synthesis_input, voice=voice, audio_config=audio_config
     )
