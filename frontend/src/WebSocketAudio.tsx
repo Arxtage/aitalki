@@ -12,12 +12,12 @@ const WebSocketAudio: React.FC = () => {
     const socketRef = useRef<WebSocket | null>(null);
     const userRecordingRef = useRef<MediaStream | null>(null);
     const [token, setToken] = useState<string | undefined>(undefined);
-    console.log("=== Entered WebSocketAudio");
+    // console.log("=== Entered WebSocketAudio");
 
     useEffect(() => {
         const retrievedToken = Cookies.get('jwt_token');
         setToken(retrievedToken);
-        console.log("====== Retrieved token:", retrievedToken);
+        // console.log("====== Retrieved token:", retrievedToken);
     }, []);
 
     useEffect(() => {
@@ -28,7 +28,7 @@ const WebSocketAudio: React.FC = () => {
 
     const connectWebSocket = () => {
         if (token) {
-            console.log("=== Token exists:", token)
+            // console.log("=== Token exists:", token)
             const wsProtocol = isProd ? 'wss' : 'ws';
             const wsUrl = `${wsProtocol}://${API_URL}/api/ws?token=${token}`;
             socketRef.current = new WebSocket(wsUrl);
@@ -57,7 +57,7 @@ const WebSocketAudio: React.FC = () => {
 
     // Start recording
     const startRecording = async () => {
-        console.log("=== Start Recording")
+        // console.log("=== Start Recording")
         if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
             connectWebSocket();  // Reconnect WebSocket if not connected
         }
@@ -75,7 +75,7 @@ const WebSocketAudio: React.FC = () => {
         mediaRecorderRef.current.onstop = () => {
             const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
             socketRef.current?.send(audioBlob);  // Send the audio to backend
-            console.log("=== Sending audio over socket")
+            // console.log("=== Sending audio over socket")
             audioChunks.current = [];
         };
 
@@ -85,7 +85,7 @@ const WebSocketAudio: React.FC = () => {
 
     // Stop recording
     const stopRecording = () => {
-        console.log("=== Stop Recording")
+        // console.log("=== Stop Recording")
         mediaRecorderRef.current?.stop();
         setIsRecording(false);
         
