@@ -29,6 +29,7 @@
     align-items: center;
     padding: 2rem;
     text-align: center;
+    flex-grow: 1;
 }
 
 .button-container {

@@ -8,7 +8,7 @@ const Home: React.FC = () => {
 
     return (
         <div className="container">
-            <h1>Become fluent in English</h1>
+            <h1>Become fluent in English with aitalki</h1>
             <div className="button-container">
                 <button 
                     className="button"

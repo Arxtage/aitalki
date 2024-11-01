@@ -1,5 +1,11 @@
 .App {
   text-align: center;
+  min-height: 100vh;
+  position: relative;
+  padding-bottom: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .App-logo {
@@ -62,4 +68,11 @@ button {
 
 audio {
   margin-top: 20px;
+}
+
+.content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 2rem;
 }
