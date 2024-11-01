@@ -2,6 +2,7 @@
 
 import os
 import google.generativeai as genai
+import logging
 
 from app.utils.prompts import CALIFORNIAN_ENGLISH_SYSTEM_PROMPT
 from app.utils.strip_markdown import strip_markdown
@@ -13,6 +14,8 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 # Store chat sessions
 chat_sessions = {}
+
+logger = logging.getLogger(__name__)
 
 async def call_gemini(input_data: bytes | str, conversation_token: str, time_signal: str = None):
     """
@@ -63,15 +66,15 @@ async def call_gemini(input_data: bytes | str, conversation_token: str, time_sig
     else:
         raise ValueError("input_data must be either bytes (audio) or str (text)")
 
-    print(f"=== Sending User Message")
+    logger.info("=== Sending User Message")
     gemini_response = await chat.send_message_async(message_to_send) # TODO: Add stream=True
 
     # Ensure the response is fully resolved before accessing its attributes
     await gemini_response.resolve()  # Wait for the response to complete
 
-    print(f'==== Chat History Length: {len(chat.history)}')
+    logger.info(f'==== Chat History Length: {len(chat.history)}')
     # Process and return the response
-    print(f"=== Teacher Response: {gemini_response.text}")
+    logger.info(f"=== Teacher Response: {gemini_response.text}")
     gemini_response_text = strip_markdown(gemini_response.text)
     return gemini_response_text
 

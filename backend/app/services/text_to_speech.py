@@ -1,9 +1,12 @@
 # BACKEND
+import logging
 
 from google.cloud import texttospeech
 from dotenv import load_dotenv
 
 load_dotenv(dotenv_path='.env')
+
+logger = logging.getLogger(__name__)
 
 async def text_to_speech(text: str):
     """
@@ -34,7 +37,7 @@ async def text_to_speech(text: str):
         volume_gain_db=0
     )
     synthesis_input = texttospeech.SynthesisInput(text=text)
-    print(f"=== Sending teacher text to TTS")
+    logger.info(f"=== Sending teacher text to TTS")
     response = await tts_client.synthesize_speech(
         input=synthesis_input, voice=voice, audio_config=audio_config
     )

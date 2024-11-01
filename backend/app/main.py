@@ -1,7 +1,7 @@
 # BACKEND
 import os
 
-from fastapi import FastAPI, WebSocket, Request, Depends, HTTPException
+from fastapi import FastAPI, WebSocket, Request, Depends, HTTPException, logger
 from authlib.integrations.starlette_client import OAuth
 import uuid
 import time
@@ -14,10 +14,19 @@ from starlette.middleware.sessions import SessionMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.applications import Starlette
 from starlette.responses import RedirectResponse
+import logging
 
 from app.services.gemini import call_gemini
 from app.services.text_to_speech import text_to_speech
 from app.utils.prompts import FIVE_MINUTES_LEFT_SIGNAL
+
+# Set up logging at the top of your file
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger(__name__)
 
 load_dotenv(dotenv_path='.env')
 
@@ -109,13 +118,13 @@ async def auth(request: Request):
 
 @app.websocket("/api/ws")
 async def websocket_endpoint(websocket: WebSocket, token: str):
-    print(f'== WS ENDPOINT ENTERED')
+    logger.info("== WS ENDPOINT ENTERED")
     try:
-        user = verify_token(token)  # Verify the token
-        print(f' === WS USER: {user}')
+        user = verify_token(token)
+        logger.info(f" === WS USER: {user}")
     except HTTPException as e:
-        print(f"== TOKEN NOT VERIFIED: {token}, error: {e}")
-        await websocket.close(code=1008)  # Close with error code
+        logger.error(f"== TOKEN NOT VERIFIED: {token}, error: {e}")
+        await websocket.close(code=1008)
         return
 
     await websocket.accept()
@@ -137,12 +146,12 @@ async def websocket_endpoint(websocket: WebSocket, token: str):
             gemini_response = await call_gemini(data, conversation_token=conversation_token)
             
         gemini_duration = time.time() - start_gemini
-        print(f"=== Gemini API call took: {gemini_duration:.2f} seconds")
+        logger.info(f"=== Gemini API call took: {gemini_duration:.2f} seconds")
 
         start_tts = time.time()
         audio_response = await text_to_speech(gemini_response)
         tts_duration = time.time() - start_tts
-        print(f"=== Text-to-Speech took: {tts_duration:.2f} seconds")
+        logger.info(f"=== Text-to-Speech took: {tts_duration:.2f} seconds")
 
         total_duration = gemini_duration + tts_duration
         print(f"=== Total processing time: {total_duration:.2f} seconds")
