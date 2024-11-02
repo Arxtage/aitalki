@@ -28,7 +28,7 @@ async def text_to_speech(text: str):
     tts_client = texttospeech.TextToSpeechAsyncClient()
 
     voice = texttospeech.VoiceSelectionParams(
-        language_code="en-US", name="en-US-Studio-Q", ssml_gender=texttospeech.SsmlVoiceGender.MALE
+        language_code="en-US", name="en-US-Journey-F", ssml_gender=texttospeech.SsmlVoiceGender.FEMALE
     )
     audio_config = texttospeech.AudioConfig(
         audio_encoding=texttospeech.AudioEncoding.MP3,

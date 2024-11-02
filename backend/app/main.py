@@ -20,6 +20,8 @@ from app.services.gemini import call_gemini
 from app.services.text_to_speech import text_to_speech
 from app.utils.prompts import FIVE_MINUTES_LEFT_SIGNAL
 
+LESSON_DURATION_SEC = 30 * 60 # 30 min
+
 # Set up logging at the top of your file
 logging.basicConfig(
     level=logging.INFO,
@@ -129,7 +131,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str):
 
     await websocket.accept()
     conversation_token = uuid.uuid4().hex
-    lesson_duration = 15 * 60  # 15 minutes
+    lesson_duration = LESSON_DURATION_SEC
     t_end = time.time() + lesson_duration
     end_lesson_warning_sent = False
 
