@@ -32,8 +32,8 @@ async def text_to_speech(text: str):
     )
     audio_config = texttospeech.AudioConfig(
         audio_encoding=texttospeech.AudioEncoding.MP3,
-        speaking_rate=0.9,
-        pitch=-2.0,
+        # speaking_rate=0.9,
+        # pitch=-2.0,
         volume_gain_db=0
     )
     synthesis_input = texttospeech.SynthesisInput(text=text)
