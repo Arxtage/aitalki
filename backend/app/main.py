@@ -66,7 +66,7 @@ app.add_middleware(
 )
 
 def create_token(user_info):
-    expiration = datetime.utcnow() + timedelta(hours=2)  # 2-hour expiration
+    expiration = datetime.utcnow() + timedelta(hours=24)  # 24-hour expiration
     payload = {
         'sub': user_info['email'],
         'name': user_info['name'],
