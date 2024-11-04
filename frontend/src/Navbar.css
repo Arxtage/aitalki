@@ -3,7 +3,7 @@
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     background-color: #f0f0f0;
     padding: 1rem 5%;
     box-sizing: border-box;
@@ -27,6 +27,16 @@
     font-size: 1.5rem;
     color: #333;
     margin: 0;
+}
+
+.Navbar-auth {
+    margin-left: auto;
+}
+
+.Navbar-username {
+    color: #333;
+    font-size: 1rem;
+    font-weight: 500;
 }
 
 /* Optional: Add hover effect */

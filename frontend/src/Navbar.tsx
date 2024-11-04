@@ -1,15 +1,31 @@
 // src/Navbar.tsx
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from './hooks/useAuth';
 import './Navbar.css';
 
 const Navbar: React.FC = () => {
+    const navigate = useNavigate();
+    const { userName, isAuthenticated } = useAuth();
+
     return (
         <nav className="Navbar">
             <Link to="/" className="Navbar-brand">
                 <img src={`${process.env.PUBLIC_URL}/aitalkie_logo_transparent.png`} alt="Logo" className="Navbar-logo" />
                 <h1 className="Navbar-title">aitalki</h1>
             </Link>
+            <div className="Navbar-auth">
+                {isAuthenticated ? (
+                    <span className="Navbar-username">{userName}</span>
+                ) : (
+                    <button 
+                        className="button"
+                        onClick={() => navigate('/login')}
+                    >
+                        Log In
+                    </button>
+                )}
+            </div>
         </nav>
     );
 };

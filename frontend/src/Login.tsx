@@ -13,7 +13,7 @@ const Login: React.FC = () => {
 
     return (
         <div className="container">
-            <h1>Login</h1>
+            <h1>Log In</h1>
             <button 
                 className="button"
                 onClick={handleLogin}

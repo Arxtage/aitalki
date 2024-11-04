@@ -26,12 +26,6 @@ const Home: React.FC = () => {
                 >
                     Start Lesson
                 </button>
-                <button 
-                    className="button"
-                    onClick={() => navigate('/login')}
-                >
-                    Login
-                </button>
             </div>
         </div>
     );
