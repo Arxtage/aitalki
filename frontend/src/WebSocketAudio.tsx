@@ -1,34 +1,34 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Cookies from 'js-cookie';
+import { useMicVAD } from '@ricky0123/vad-react';
 import './Common.css';
 
 const isProd = process.env.REACT_APP_STAGE === 'prod';
 const API_URL = isProd ? 'aitalki.app' : 'localhost:8000';
+const SILENCE_DURATION = 2000; // 2 seconds of silence before sending audio
 
 const WebSocketAudio: React.FC = () => {
     const [isRecording, setIsRecording] = useState(false);
-    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const [statusText, setStatusText] = useState('Start Recording');
     const audioChunks = useRef<Blob[]>([]);
     const socketRef = useRef<WebSocket | null>(null);
-    const userRecordingRef = useRef<MediaStream | null>(null);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const [token, setToken] = useState<string | undefined>(undefined);
-    // console.log("=== Entered WebSocketAudio");
+    const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const retrievedToken = Cookies.get('jwt_token');
         setToken(retrievedToken);
-        // console.log("====== Retrieved token:", retrievedToken);
     }, []);
 
     useEffect(() => {
         if (token) {
             connectWebSocket();
         }
-    }, [token]);  // Run only when token is set
+    }, [token]);
 
     const connectWebSocket = () => {
         if (token) {
-            // console.log("=== Token exists:", token)
             const wsProtocol = isProd ? 'wss' : 'ws';
             const wsUrl = `${wsProtocol}://${API_URL}/api/ws?token=${token}`;
             socketRef.current = new WebSocket(wsUrl);
@@ -37,16 +37,8 @@ const WebSocketAudio: React.FC = () => {
                 const audioBlob = new Blob([event.data], { type: 'audio/wav' });
                 const url = URL.createObjectURL(audioBlob);
                 const audio = new Audio(url);
-                
-                // Play the audio with user interaction in mind
-                const playAudio = () => {
-                    audio.play().catch(error => {
-                        console.error("Error playing audio:", error);
-                    });
-                };
-
-                // Attempt playback on user interaction
-                document.addEventListener('click', playAudio, { once: true });
+                audio.play().catch(console.error);
+                setStatusText('Speaking'); // Update status to Speaking when audio is playing
             };
     
             socketRef.current.onclose = () => {
@@ -55,66 +47,98 @@ const WebSocketAudio: React.FC = () => {
         }
     };
 
-    // Start recording
-    const startRecording = async () => {
-        // console.log("=== Start Recording")
-        if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
-            connectWebSocket();  // Reconnect WebSocket if not connected
-        }
+    const vad = useMicVAD({
+        ortConfig(ort) {
+            ort.env.wasm.wasmPaths = "/";
+          },
+        workletURL: '/vad.worklet.bundle.min.js',
+        modelURL: '/silero_vad.onnx',
+        onSpeechStart: () => {
+            console.log('Speech started');
+            setStatusText('Listening'); // Update status to Listening
+            if (!mediaRecorderRef.current && isRecording) {
+                startNewRecording();
+            }
+            if (silenceTimeoutRef.current) {
+                clearTimeout(silenceTimeoutRef.current); // Clear silence timeout
+            }
+        },
+        onSpeechEnd: () => {
+            console.log('Speech ended');
+            if (mediaRecorderRef.current) {
+                mediaRecorderRef.current.stop();
+                mediaRecorderRef.current = null;
+            }
+            // Start silence timeout after speech ends
+            silenceTimeoutRef.current = setTimeout(() => {
+                sendAudioToBackend();
+            }, SILENCE_DURATION);
+        },
+        onVADMisfire: () => {
+            console.log('VAD misfire');
+        },
+    });
 
-        // Get the media stream
-        const userRecording = await navigator.mediaDevices.getUserMedia({ audio: true });
-        userRecordingRef.current = userRecording; // Store the media stream
-        mediaRecorderRef.current = new MediaRecorder(userRecording);
-        audioChunks.current = [];
-
-        mediaRecorderRef.current.ondataavailable = (event) => {
-            audioChunks.current.push(event.data);
-        };
-
-        mediaRecorderRef.current.onstop = () => {
-            const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
-            socketRef.current?.send(audioBlob);  // Send the audio to backend
-            // console.log("=== Sending audio over socket")
+    const startNewRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
             audioChunks.current = [];
-        };
 
-        mediaRecorderRef.current.start();
-        setIsRecording(true);
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.current.push(event.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                // Clean up the stream
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+        } catch (error) {
+            console.error('Error starting recording:', error);
+        }
     };
 
-    // Stop recording
-    const stopRecording = () => {
-        // console.log("=== Stop Recording")
-        mediaRecorderRef.current?.stop();
-        setIsRecording(false);
-        
-        // Stop the media stream to deactivate the microphone
-        if (userRecordingRef.current) {
-            userRecordingRef.current.getTracks().forEach(track => track.stop());
-            userRecordingRef.current = null; // Clear the reference
+    const sendAudioToBackend = () => {
+        if (audioChunks.current.length > 0) {
+            const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
+            socketRef.current?.send(audioBlob);
+            audioChunks.current = [];
+        }
+        setStatusText('Start Recording'); // Reset status text
+        setIsRecording(false); // Stop recording
+    };
+
+    const toggleRecording = () => {
+        if (!isRecording) {
+            setIsRecording(true);
+            setStatusText('Listening'); // Update status to Listening
+            vad.start();
+        } else {
+            setIsRecording(false);
+            vad.pause();
+            if (mediaRecorderRef.current) {
+                mediaRecorderRef.current.stop();
+                mediaRecorderRef.current = null;
+            }
         }
     };
 
     return (
         <div className="container">
             <h1>Lesson</h1>
+            <p>{statusText}</p> {/* Display status text */}
             <div className="button-container">
                 <button 
-                    className="button"
-                    onClick={startRecording} 
-                    disabled={isRecording}
+                    className={`button ${isRecording ? 'recording' : ''}`}
+                    onClick={toggleRecording}
                 >
-                    Start Recording
-                </button>
-                <button 
-                    className="button"
-                    onClick={stopRecording} 
-                    disabled={!isRecording}
-                >
-                    Stop Recording
+                    {isRecording ? 'Stop Recording' : 'Start Recording'}
                 </button>
             </div>
+            {vad.loading && <p>Loading voice detection...</p>}
         </div>
     );
 };
