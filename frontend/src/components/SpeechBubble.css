@@ -1,0 +1,27 @@
+.bubble {
+    width: 100px; /* Adjust size as needed */
+    height: 100px; /* Adjust size as needed */
+    border-radius: 50%;
+    background-color: rgb(231, 78, 78); /* Color of the bubble */
+    position: relative; /* Position it as needed */
+    margin: 0 auto; /* Center horizontally */
+    transition: transform 0.3s ease, opacity 0.3s ease; /* Smooth transition */
+    opacity: 1; /* Always Visible */
+}
+
+.bubble.active {
+    opacity: 1; /* Show when active */
+    animation: pulse 1s infinite; /* Pulse animation */
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2); /* Scale up */
+    }
+    100% {
+        transform: scale(1); /* Scale back */
+    }
+}

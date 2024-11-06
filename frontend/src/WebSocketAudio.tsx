@@ -1,15 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { useMicVAD } from '@ricky0123/vad-react';
+import Bubble from './components/SpeechBubble'; // Import the Bubble component
 import './Common.css';
 
 const isProd = process.env.REACT_APP_STAGE === 'prod';
 const API_URL = isProd ? 'aitalki.app' : 'localhost:8000';
-const SILENCE_DURATION = 2000; // 2 seconds of silence before sending audio
+const SILENCE_DURATION = 5000; // 5 seconds of silence before sending audio
 
 const WebSocketAudio: React.FC = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [statusText, setStatusText] = useState('Start Recording');
+    const [isBubbleActive, setIsBubbleActive] = useState(false); // State for bubble
     const audioChunks = useRef<Blob[]>([]);
     const socketRef = useRef<WebSocket | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -38,7 +40,13 @@ const WebSocketAudio: React.FC = () => {
                 const url = URL.createObjectURL(audioBlob);
                 const audio = new Audio(url);
                 audio.play().catch(console.error);
+                console.log('Playing audio from teacher');
                 setStatusText('Speaking'); // Update status to Speaking when audio is playing
+                setIsBubbleActive(true); // Activate bubble when teacher speaks
+
+                audio.onended = () => {
+                    setIsBubbleActive(false); // Deactivate bubble when audio ends
+                };
             };
     
             socketRef.current.onclose = () => {
@@ -50,12 +58,13 @@ const WebSocketAudio: React.FC = () => {
     const vad = useMicVAD({
         ortConfig(ort) {
             ort.env.wasm.wasmPaths = "/";
-          },
+        },
         workletURL: '/vad.worklet.bundle.min.js',
         modelURL: '/silero_vad.onnx',
         onSpeechStart: () => {
             console.log('Speech started');
             setStatusText('Listening'); // Update status to Listening
+            setIsBubbleActive(true); // Activate bubble when user speaks
             if (!mediaRecorderRef.current && isRecording) {
                 startNewRecording();
             }
@@ -65,6 +74,7 @@ const WebSocketAudio: React.FC = () => {
         },
         onSpeechEnd: () => {
             console.log('Speech ended');
+            setIsBubbleActive(false); // Deactivate bubble when user stops speaking
             if (mediaRecorderRef.current) {
                 mediaRecorderRef.current.stop();
                 mediaRecorderRef.current = null;
@@ -73,6 +83,7 @@ const WebSocketAudio: React.FC = () => {
             silenceTimeoutRef.current = setTimeout(() => {
                 sendAudioToBackend();
             }, SILENCE_DURATION);
+            console.log("Silence Timeout Started");
         },
         onVADMisfire: () => {
             console.log('VAD misfire');
@@ -113,10 +124,12 @@ const WebSocketAudio: React.FC = () => {
 
     const toggleRecording = () => {
         if (!isRecording) {
+            console.log('Toggle it is: !isRecording, Started Vad');
             setIsRecording(true);
             setStatusText('Listening'); // Update status to Listening
             vad.start();
         } else {
+            console.log('Toggle it isRecording, Paused Vad');
             setIsRecording(false);
             vad.pause();
             if (mediaRecorderRef.current) {
@@ -130,6 +143,9 @@ const WebSocketAudio: React.FC = () => {
         <div className="container">
             <h1>Lesson</h1>
             <p>{statusText}</p> {/* Display status text */}
+            <div className="bubble-container"> {/* New container for the bubble */}
+                <Bubble isActive={isBubbleActive} /> {/* Render the bubble */}
+            </div>
             <div className="button-container">
                 <button 
                     className={`button ${isRecording ? 'recording' : ''}`}

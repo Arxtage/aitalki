@@ -113,7 +113,7 @@ async def auth(request: Request):
             value=jwt_token,
             httponly=False,
             samesite="None",
-            secure=True if is_prod else False  # False for local development; set True in production over HTTPS
+            secure=True  # False for local development; set True in production over HTTPS
         )
         return response
     raise HTTPException(status_code=401, detail="Authentication failed")

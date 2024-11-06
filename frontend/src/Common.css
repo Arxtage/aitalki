@@ -37,3 +37,11 @@
     gap: 1rem;
     margin-top: 1rem;
 }
+
+.bubble-container {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+    position: relative;
+    width: 100%;
+}
