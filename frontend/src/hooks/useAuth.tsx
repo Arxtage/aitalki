@@ -18,8 +18,14 @@ export const useAuth = () => {
         const token = Cookies.get('jwt_token');
         if (token) {
             try {
-                const decoded = jwtDecode(token) as DecodedToken;
-                setUserName(decoded.name);
+                const decoded = jwtDecode<DecodedToken>(token);
+                if (decoded.exp * 1000 < Date.now()) {
+                    // Token is expired
+                    setUserName(null); // Clear user name if token is expired
+                    Cookies.remove('jwt_token'); // Optionally remove the expired token
+                } else {
+                    setUserName(decoded.name);
+                }
             } catch (error) {
                 console.error('Error decoding token:', error);
             }
