@@ -1,0 +1,74 @@
+.landing-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 2rem;
+    background-color: #f5f5f5;
+}
+
+.hero-section {
+    text-align: left;
+    margin: 28vh 5vh;
+    /* padding-top: 25vh;
+    padding-bottom: 25vh; */
+    width: 100%;
+}
+
+.hero-section h1 {
+    font-size: 3rem;
+    color: #e35555;
+}
+
+.hero-section p {
+    font-size: 1.2rem;
+    margin: 1rem 0;
+    color: #403d3d;
+}
+
+/* .hero-section .button {
+    margin-top: 1rem;
+} */
+
+.features-section, .pricing-section, .cta-section {
+    width: 80%;
+    margin: 5vh auto;
+    padding: 1rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.features-section h2, .pricing-section h2, .cta-section h2 {
+    font-size: 2rem;
+    color: #e35555;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.features-section p, .features-section li, .pricing-section p, .cta-section p {
+    margin: 1.2rem 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.features-section ul {
+    list-style-type: none;
+    padding: 0;
+    text-align: left;
+    margin-left: 3vh;
+}
+
+/* .button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    background-color: #e35555;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.button:hover {
+    background-color: #e07171;
+} */
