@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Home from './Home';
 import Lesson from './Lesson';
 import Login from './Login';
@@ -25,6 +25,7 @@ const App: React.FC = () => {
                                 </ProtectedRoute>
                             } 
                         />
+                        <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </div>
                 <Footer />
