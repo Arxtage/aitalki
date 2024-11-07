@@ -1,17 +1,36 @@
 // src/Home.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import './Common.css';
 import './Home.css'; // Updated CSS file for landing page styles
 
 const Home: React.FC = () => {
     const { isAuthenticated } = useAuth();
+    const location = useLocation();
+    const [showPopup, setShowPopup] = useState(false);
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        if (params.get('apply_for_beta') === 'true') {
+            setShowPopup(true);
+        }
+    }, [location]);
 
     return (
         <div className="landing-container">
+            {showPopup && (
+                <div className="popup">
+                    <p>🚧 We're in <strong>Beta</strong> now! Want in? Sign up for early access to aitalkie! 🚀</p>
+                    <button className="button" onClick={() => window.open('https://forms.gle/J9TtD6fDiaiFk6Dq6', '_blank')}>
+                        Sign Up for Beta
+                    </button>
+                    <button className="button" onClick={() => setShowPopup(false)}>Close</button>
+                </div>
+            )}
             <section className="hero-section">
                 <h1>Become fluent in English with aitalki</h1>
-                <p>Stop paying for italki, chat with your personilised AI language tutor at a fraction of the cost.</p>
+                <p>Stop paying for italki, chat with your personalized AI language tutor at a fraction of the cost.</p>
                 {isAuthenticated ? (
                     <button className="button" onClick={() => window.location.href = '/lesson'}>
                         Start Lesson

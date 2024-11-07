@@ -39,7 +39,7 @@
     text-align: center;
 }
 
-.features-section p, .features-section li, .pricing-section p, .cta-section p {
+.features-section p, .features-section li, .pricing-section p, .cta-section p, .popup p{
     margin: 1.2rem 0;
     font-size: 1.1rem;
     color: #333;
@@ -50,4 +50,20 @@
     padding: 0;
     text-align: left;
     margin-left: 3vh;
+}
+
+.popup {
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    align-items: center; /* Center align the buttons */
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border: 2px solid #e35555;
+    border-radius: 8px;
+    padding: 20px;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }

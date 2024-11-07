@@ -20,7 +20,12 @@ from app.services.gemini import call_gemini
 from app.services.text_to_speech import text_to_speech
 from app.utils.prompts import FIVE_MINUTES_LEFT_SIGNAL
 
+SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
+JWT_SECRET = os.environ.get('JWT_SECRET') or secrets.token_hex(32)
+STAGE = os.environ.get('STAGE')
 LESSON_DURATION_SEC = 30 * 60 # 30 min
+ALLOWED_EMAILS = ["tsaturyanarmann@gmail.com", "brutents11@gmail.com"]
+
 
 # Set up logging at the top of your file
 logging.basicConfig(
@@ -33,10 +38,6 @@ logger = logging.getLogger(__name__)
 load_dotenv(dotenv_path='.env')
 
 app = FastAPI()
-
-SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
-JWT_SECRET = os.environ.get('JWT_SECRET') or secrets.token_hex(32)
-STAGE = os.environ.get('STAGE')
 
 is_prod = True if STAGE == "prod" else False
 API_URL = "https://aitalki.app" if is_prod else "http://localhost:3000"
@@ -102,12 +103,17 @@ async def login(request: Request):
 async def auth(request: Request):
     token = await oauth.google.authorize_access_token(request)
     user = token.get('userinfo')
+    
     if user:
+        user_email = user['email']
+
+        if user_email not in ALLOWED_EMAILS:
+            # Redirect to home with a query parameter
+            return RedirectResponse(url=f"{API_URL}/?apply_for_beta=true")
+
         request.session['user'] = dict(user)
         jwt_token = create_token(dict(user))
         response = RedirectResponse(url=f"{API_URL}/lesson")
-        # Set the cookie on the response
-        print(f' ==== Set new cookie for user: {jwt_token}')
         response.set_cookie(
             key="jwt_token",
             value=jwt_token,
@@ -116,6 +122,7 @@ async def auth(request: Request):
             secure=True if is_prod else False
         )
         return response
+    
     raise HTTPException(status_code=401, detail="Authentication failed")
 
 @app.websocket("/api/ws")
