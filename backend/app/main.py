@@ -59,7 +59,7 @@ oauth.register(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[API_URL],  # Only React frontend
+    allow_origins=[API_URL if is_prod else "http://localhost:3000", "http://localhost:8000"],  # Only React frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -112,8 +112,8 @@ async def auth(request: Request):
             key="jwt_token",
             value=jwt_token,
             httponly=False,
-            samesite="None",
-            secure=True  # False for local development; set True in production over HTTPS
+            samesite="None" if is_prod else "lax",
+            secure=True if is_prod else False
         )
         return response
     raise HTTPException(status_code=401, detail="Authentication failed")

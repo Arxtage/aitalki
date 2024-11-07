@@ -6,7 +6,7 @@ import './Navbar.css';
 
 const Navbar: React.FC = () => {
     const navigate = useNavigate();
-    const { userName, isAuthenticated } = useAuth();
+    const { userName, isAuthenticated, logout } = useAuth();
 
     return (
         <nav className="Navbar">
@@ -16,12 +16,14 @@ const Navbar: React.FC = () => {
             </Link>
             <div className="Navbar-auth">
                 {isAuthenticated ? (
-                    <span className="Navbar-username">{userName}</span>
+                    <>
+                        <span className="Navbar-username">{userName}</span>
+                        <button className="button" onClick={logout}>
+                            Log Out
+                        </button>
+                    </>
                 ) : (
-                    <button 
-                        className="button"
-                        onClick={() => navigate('/login')}
-                    >
+                    <button className="button" onClick={() => navigate('/login')}>
                         Log In
                     </button>
                 )}
