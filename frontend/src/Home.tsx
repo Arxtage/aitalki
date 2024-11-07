@@ -21,7 +21,7 @@ const Home: React.FC = () => {
         <div className="landing-container">
             {showPopup && (
                 <div className="popup">
-                    <p>🚧 We're in <strong>Beta</strong> now! Want in? Sign up for early access to aitalkie! 🚀</p>
+                    <p>🚧 We're in <strong>Beta</strong> now! Want in? Sign up for early access to aitalki! 🚀</p>
                     <button className="button" onClick={() => window.open('https://forms.gle/J9TtD6fDiaiFk6Dq6', '_blank')}>
                         Sign Up for Beta
                     </button>
