@@ -23,8 +23,10 @@
     color: #403d3d;
 }
 
+
 .features-section, .pricing-section, .cta-section {
     width: 80%;
+    height: 60%;
     margin: 5vh auto;
     padding: 1rem;
     background-color: white;
@@ -39,7 +41,7 @@
     text-align: center;
 }
 
-.features-section p, .features-section li, .pricing-section p, .cta-section p, .popup p{
+.features-section p, .features-section li, .pricing-section p, .cta-section p, .popup p {
     margin: 1.2rem 0;
     font-size: 1.1rem;
     color: #333;
@@ -66,4 +68,40 @@
     padding: 20px;
     z-index: 1000;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.features-content {
+    display: flex;
+    justify-content: flex-start; /* Align items to the start */
+    align-items: center; /* Center vertically */
+    padding: 3vh;
+}
+
+.features-text {
+    flex: 1; /* Allow text to take available space */
+}
+
+.lesson-gif {
+    width: 50%; /* Adjust width as needed */
+    border-radius: 8px; /* Rounded edges */
+    margin: 2vh;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
+}
+
+/* Media query for responsive design */
+@media (max-width: 768px) {
+    .features-content {
+        flex-direction: column; /* Stack items vertically on small screens */
+        align-items: center; /* Center align items */
+    }
+
+    .features-text {
+        margin-left: 0; /* Remove left margin */
+        margin-top: 20px; /* Add some space above the text */
+        text-align: center; /* Center text on small screens */
+    }
+
+    .lesson-gif {
+        width: 80%; /* Adjust width for mobile */
+    }
 }

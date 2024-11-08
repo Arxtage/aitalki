@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import './Common.css';
 import './Home.css'; // Updated CSS file for landing page styles
+import lessonGif from './media/lesson.gif'; // Update the path to your GIF
 
 const Home: React.FC = () => {
     const { isAuthenticated } = useAuth();
@@ -44,12 +45,17 @@ const Home: React.FC = () => {
 
             <section className="features-section">
                 <h2>Features</h2>
-                <ul>
-                    <li>👩‍🏫 Lessons Just for You: Tailored to your style and goals!</li>
-                    <li>🌍 Accent of Your Dreams: Pick your vibe – 🇺🇸 American or 🇬🇧 British!</li>
-                    <li>⚡️ Real-Time Fixes: Instant pronunciation & grammar coaching.</li>
-                    <li>📈 Your Progress, Tracked: Watch yourself level up!</li>
-                </ul>
+                <div className="features-content">
+                    <div className="features-text">
+                        <ul>
+                            <li>👩‍🏫 Lessons Just for You: Tailored to your style and goals!</li>
+                            <li>🌍 Accent of Your Dreams: Pick your vibe – 🇺🇸 American or 🇬🇧 British!</li>
+                            <li>⚡️ Real-Time Fixes: Instant pronunciation & grammar coaching.</li>
+                            <li>📈 Your Progress, Tracked: Watch yourself level up!</li>
+                        </ul>
+                    </div>
+                    <img src={lessonGif} alt="Lesson GIF" className="lesson-gif" />
+                </div>
             </section>
 
             <section className="pricing-section">
