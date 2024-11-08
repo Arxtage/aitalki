@@ -6,15 +6,16 @@ import './Common.css';
 
 const isProd = process.env.REACT_APP_STAGE === 'prod';
 const API_URL = isProd ? 'aitalki.app' : 'localhost:8000';
-const SILENCE_DURATION = 5000; // 5 seconds of silence before sending audio
+const SILENCE_DURATION = 200; // ms of silence before sending audio
 
 const WebSocketAudio: React.FC = () => {
     const [isRecording, setIsRecording] = useState(false);
-    const [statusText, setStatusText] = useState('Start Recording');
+    const [statusText, setStatusText] = useState<string | null>(null);
     const [isBubbleActive, setIsBubbleActive] = useState(false); // State for bubble
     const audioChunks = useRef<Blob[]>([]);
     const socketRef = useRef<WebSocket | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const mediaStreamRef = useRef<MediaStream | null>(null); // Reference to the media stream
     const [token, setToken] = useState<string | undefined>(undefined);
     const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -22,12 +23,6 @@ const WebSocketAudio: React.FC = () => {
         const retrievedToken = Cookies.get('jwt_token');
         setToken(retrievedToken);
     }, []);
-
-    useEffect(() => {
-        if (token) {
-            connectWebSocket();
-        }
-    }, [token]);
 
     const connectWebSocket = () => {
         if (token) {
@@ -46,6 +41,7 @@ const WebSocketAudio: React.FC = () => {
 
                 audio.onended = () => {
                     setIsBubbleActive(false); // Deactivate bubble when audio ends
+                    setStatusText(null)
                 };
             };
     
@@ -75,24 +71,29 @@ const WebSocketAudio: React.FC = () => {
         onSpeechEnd: () => {
             console.log('Speech ended');
             setIsBubbleActive(false); // Deactivate bubble when user stops speaking
+            setStatusText(null)
             if (mediaRecorderRef.current) {
                 mediaRecorderRef.current.stop();
                 mediaRecorderRef.current = null;
             }
             // Start silence timeout after speech ends
             silenceTimeoutRef.current = setTimeout(() => {
+                console.log("SENDING TO BACKEND")
                 sendAudioToBackend();
             }, SILENCE_DURATION);
             console.log("Silence Timeout Started");
         },
         onVADMisfire: () => {
             console.log('VAD misfire');
+            setIsBubbleActive(false); // Deactivate bubble when user stops speaking
+            setStatusText(null);
         },
     });
 
     const startNewRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaStreamRef.current = stream; // Store the media stream reference
             const mediaRecorder = new MediaRecorder(stream);
             mediaRecorderRef.current = mediaRecorder;
             audioChunks.current = [];
@@ -104,7 +105,7 @@ const WebSocketAudio: React.FC = () => {
             mediaRecorder.onstop = () => {
                 // Clean up the stream
                 stream.getTracks().forEach(track => track.stop());
-            };
+            }
 
             mediaRecorder.start();
         } catch (error) {
@@ -118,8 +119,8 @@ const WebSocketAudio: React.FC = () => {
             socketRef.current?.send(audioBlob);
             audioChunks.current = [];
         }
-        setStatusText('Start Recording'); // Reset status text
-        setIsRecording(false); // Stop recording
+        // setStatusText('Start Recording'); // Reset status text
+        // setIsRecording(false); // Stop recording
     };
 
     const toggleRecording = () => {
@@ -127,7 +128,8 @@ const WebSocketAudio: React.FC = () => {
             console.log('Toggle it is: !isRecording, Started Vad');
             setIsRecording(true);
             setStatusText('Listening'); // Update status to Listening
-            vad.start();
+            connectWebSocket(); // Connect WebSocket only when starting the lesson
+            vad.start(); // Start VAD
         } else {
             console.log('Toggle it isRecording, Paused Vad');
             setIsRecording(false);
@@ -136,12 +138,18 @@ const WebSocketAudio: React.FC = () => {
                 mediaRecorderRef.current.stop();
                 mediaRecorderRef.current = null;
             }
+            // Stop the media stream to turn off the microphone
+            if (mediaStreamRef.current) {
+                mediaStreamRef.current.getTracks().forEach(track => track.stop());
+                mediaStreamRef.current = null; // Clear the reference
+            }
+            setIsBubbleActive(false); // Deactivate bubble when leaving lesson
+            setStatusText(null);
         }
     };
 
     return (
-        <div className="container">
-            <h1>Lesson</h1>
+        <div className="lesson-container">
             <p>{statusText}</p> {/* Display status text */}
             <div className="bubble-container"> {/* New container for the bubble */}
                 <Bubble isActive={isBubbleActive} /> {/* Render the bubble */}
@@ -151,10 +159,9 @@ const WebSocketAudio: React.FC = () => {
                     className={`button ${isRecording ? 'recording' : ''}`}
                     onClick={toggleRecording}
                 >
-                    {isRecording ? 'Stop Recording' : 'Start Recording'}
+                    {isRecording ? 'Leave Lesson' : 'Start Lesson'}
                 </button>
             </div>
-            {vad.loading && <p>Loading voice detection...</p>}
         </div>
     );
 };

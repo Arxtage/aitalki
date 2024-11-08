@@ -19,6 +19,18 @@ logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = CALIFORNIAN_ENGLISH_SYSTEM_PROMPT
 
+# File to log conversation history
+LOG_FILE_PATH = 'conversation_history.txt'
+
+def log_conversation(conversation_token: str, message: str):
+    """Append the conversation message to a log file."""
+    logger.info(f'== Logging to file:')
+    with open(LOG_FILE_PATH, 'a') as log_file:
+        logger.info(f'== Logging to file:')
+        log_file.write(f"Conversation Token: {conversation_token}\n")
+        log_file.write(f"{message}\n")
+        log_file.write("-" * 40 + "\n")  # Separator for readability
+
 async def call_gemini(input_data: bytes | str, conversation_token: str, time_signal: str = None):
     """
     Call Gemini API with audio data or text and conversation context.
@@ -49,7 +61,6 @@ async def call_gemini(input_data: bytes | str, conversation_token: str, time_sig
     # Determine the type of input and send the message accordingly
     if isinstance(input_data, bytes):
         if include_system_prompt:
-
             message_to_send.append(SYSTEM_PROMPT)
             message_to_send.append("User audio:")
             message_to_send.append({
@@ -72,6 +83,10 @@ async def call_gemini(input_data: bytes | str, conversation_token: str, time_sig
         raise ValueError("input_data must be either bytes (audio) or str (text)")
 
     logger.info("=== Sending User Message")
+    
+    # Log the user message
+    log_conversation(conversation_token, f"User: {input_data if isinstance(input_data, str) else 'Audio data sent'}")
+
     gemini_response = await chat.send_message_async(message_to_send) # TODO: Add stream=True
 
     # Ensure the response is fully resolved before accessing its attributes
@@ -80,6 +95,10 @@ async def call_gemini(input_data: bytes | str, conversation_token: str, time_sig
     logger.info(f'==== Chat History Length: {len(chat.history)}')
     # Process and return the response
     logger.info(f"=== Teacher Response: {gemini_response.text}")
+    
+    # Log the teacher's response
+    log_conversation(conversation_token, f"Teacher: {gemini_response.text}")
+
     gemini_response_text = strip_markdown(gemini_response.text)
     return gemini_response_text
 

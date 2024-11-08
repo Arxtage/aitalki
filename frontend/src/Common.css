@@ -45,3 +45,22 @@
     position: relative;
     width: 100%;
 }
+
+.lesson-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 90vh;
+    padding: 2rem;
+    text-align: center;
+    flex: 1;
+}
+
+
+.lesson-container p {
+    height: 1.5rem; /* Fixed height to reserve space */
+    margin: 0 0 1.2rem 0; /* Remove top margin */
+    font-size: 1.1rem;
+    color: #333;
+}
