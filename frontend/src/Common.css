@@ -3,7 +3,7 @@
     font-size: 1rem;
     border: none;
     border-radius: 5px;
-    background-color: #e35555;
+    background-color: #A11C6A;
     color: white;
     cursor: pointer;
     transition: background-color 0.2s;
@@ -11,7 +11,7 @@
 }
 
 .button:hover {
-    background-color: #e07171;
+    background-color: #A11C6A;
 }
 
 .button:active {

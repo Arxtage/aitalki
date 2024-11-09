@@ -2,7 +2,7 @@
     width: 100px; /* Adjust size as needed */
     height: 100px; /* Adjust size as needed */
     border-radius: 50%;
-    background-color: rgb(231, 78, 78); /* Color of the bubble */
+    background-color: #A11C6A; /* Color of the bubble */
     position: relative; /* Position it as needed */
     margin: 0 auto; /* Center horizontally */
     transition: transform 0.3s ease, opacity 0.3s ease; /* Smooth transition */
