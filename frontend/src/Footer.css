@@ -8,3 +8,14 @@
     font-size: 0.9rem;
     box-sizing: border-box;
 }
+
+.footer a {
+    margin-top: -2px;
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
