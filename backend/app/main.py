@@ -19,6 +19,8 @@ import logging
 from app.services.gemini import call_gemini
 from app.services.text_to_speech import text_to_speech
 from app.utils.prompts import FIVE_MINUTES_LEFT_SIGNAL
+from app.database import engine, Base
+from app.models.user import User
 
 SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
 JWT_SECRET = os.environ.get('JWT_SECRET') or secrets.token_hex(32)
@@ -165,3 +167,8 @@ async def websocket_endpoint(websocket: WebSocket, token: str):
         logger.info(f"=== Total processing time: {total_duration:.2f} seconds")
 
         await websocket.send_bytes(audio_response)
+
+# Create the database tables
+@app.on_event("startup")
+def startup():
+    Base.metadata.create_all(bind=engine)

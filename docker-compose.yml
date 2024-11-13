@@ -14,7 +14,6 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - NODE_ENV=production  # Ensure production mode in Docker Compose
 
-
   backend:
     build:
       context: ./backend  # Path to the backend directory
@@ -25,7 +24,19 @@ services:
       - frontend-build:/frontend/build  # Mount the same volume to the backend
     depends_on:
       - frontend
+      - db  # Add dependency on the PostgreSQL service
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/mydatabase  # Connection string for PostgreSQL
     command: ["sh", "-c", "while ! [ -d /frontend/build/static ]; do sleep 1; done; uvicorn app.main:app --host 0.0.0.0 --port 80"]  # Wait for static files
+
+  db:
+    image: postgres:latest
+    restart: always
+    env_file:
+      - ./backend/.env  # Load environment variables from the .env file
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
   frontend-build:
+  postgres_data:  # Named volume for PostgreSQL data
