@@ -23,7 +23,7 @@ from app.utils.prompts import FIVE_MINUTES_LEFT_SIGNAL
 SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
 JWT_SECRET = os.environ.get('JWT_SECRET') or secrets.token_hex(32)
 STAGE = os.environ.get('STAGE')
-LESSON_DURATION_SEC = 30 * 60 # 30 min
+LESSON_DURATION_SEC = 45 * 60 # 45 min
 ALLOWED_EMAILS = ["tsaturyanarmann@gmail.com", "brutents11@gmail.com"]
 
 
@@ -41,7 +41,7 @@ app = FastAPI()
 
 is_prod = True if STAGE == "prod" else False
 API_URL = "https://aitalki.app" if is_prod else "http://localhost:3000"
-print(f'==== API_URL: {API_URL}')
+logger.info(f'==== API_URL: {API_URL}')
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
 # TODO: Check the Security
@@ -95,7 +95,7 @@ async def get_user(request: Request):
 
 @app.get("/api/login")
 async def login(request: Request):
-    print(f'== Entered Login')
+    logger.info(f'== Entered Login')
     redirect_uri = request.url_for('auth')
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
@@ -163,6 +163,6 @@ async def websocket_endpoint(websocket: WebSocket, token: str):
         logger.info(f"=== Text-to-Speech took: {tts_duration:.2f} seconds")
 
         total_duration = gemini_duration + tts_duration
-        print(f"=== Total processing time: {total_duration:.2f} seconds")
+        logger.info(f"=== Total processing time: {total_duration:.2f} seconds")
 
         await websocket.send_bytes(audio_response)
