@@ -41,7 +41,6 @@ app = FastAPI()
 
 is_prod = True if STAGE == "prod" else False
 API_URL = "https://aitalki.app" if is_prod else "http://localhost:3000"
-logger.info(f'==== API_URL: {API_URL}')
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
 # TODO: Check the Security

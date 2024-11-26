@@ -24,7 +24,6 @@ LOG_FILE_PATH = 'conversation_history.txt'
 
 def log_conversation(conversation_token: str, message: str):
     """Append the conversation message to a log file."""
-    logger.info(f'== Logging to file:')
     with open(LOG_FILE_PATH, 'a') as log_file:
         logger.info(f'== Logging to file:')
         log_file.write(f"Conversation Token: {conversation_token}\n")
