@@ -6,7 +6,7 @@ import './Common.css';
 
 const isProd = process.env.REACT_APP_STAGE === 'prod';
 const API_URL = isProd ? 'aitalki.app' : 'localhost:8000';
-const SILENCE_DURATION = 200; // ms of silence before sending audio
+const SILENCE_DURATION = 1000; // ms of silence before sending audio
 
 const WebSocketAudio: React.FC = () => {
     const [isRecording, setIsRecording] = useState(false);
@@ -57,15 +57,16 @@ const WebSocketAudio: React.FC = () => {
         },
         workletURL: '/vad.worklet.bundle.min.js',
         modelURL: '/silero_vad.onnx',
+        startOnLoad: false,
         onSpeechStart: () => {
             console.log('Speech started');
+            if (silenceTimeoutRef.current) {
+                clearTimeout(silenceTimeoutRef.current); // Clear silence timeout
+            }
             setStatusText('Listening'); // Update status to Listening
             setIsBubbleActive(true); // Activate bubble when user speaks
             if (!mediaRecorderRef.current && isRecording) {
                 startNewRecording();
-            }
-            if (silenceTimeoutRef.current) {
-                clearTimeout(silenceTimeoutRef.current); // Clear silence timeout
             }
         },
         onSpeechEnd: () => {
@@ -119,8 +120,6 @@ const WebSocketAudio: React.FC = () => {
             socketRef.current?.send(audioBlob);
             audioChunks.current = [];
         }
-        // setStatusText('Start Recording'); // Reset status text
-        // setIsRecording(false); // Stop recording
     };
 
     const toggleRecording = () => {
