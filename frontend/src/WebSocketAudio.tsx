@@ -18,6 +18,7 @@ const WebSocketAudio: React.FC = () => {
     const lessonActiveRef = useRef(false);
     const audioChunks = useRef<Blob[]>([]);
     const socketRef = useRef<WebSocket | null>(null);
+    const currentPlayingAudioRef = useRef<HTMLAudioElement | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const mediaStreamRef = useRef<MediaStream | null>(null);
     const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -35,22 +36,35 @@ const WebSocketAudio: React.FC = () => {
             socketRef.current = new WebSocket(wsUrl);
     
             socketRef.current.onmessage = (event) => {
-                // Only play audio if lesson is active
-                if (!lessonActiveRef.current) { // NOTE: lessonActiveRef is for internal logic
+                if (!lessonActiveRef.current) {
                     console.log('Ignoring teacher audio - lesson not active');
                     return;
                 }
+
+                // Stop any currently playing audio
+                if (currentPlayingAudioRef.current) {
+                    currentPlayingAudioRef.current.pause();
+                    URL.revokeObjectURL(currentPlayingAudioRef.current.src);
+                    currentPlayingAudioRef.current = null;
+                    setIsBubbleActive(false);
+                    setStatusText(null);
+                }
+
                 const audioBlob = new Blob([event.data], { type: 'audio/wav' });
                 const url = URL.createObjectURL(audioBlob);
                 const audio = new Audio(url);
+                currentPlayingAudioRef.current = audio;
+                
                 audio.play().catch(console.error);
                 console.log('Playing audio from teacher');
-                setStatusText('Speaking'); // Update status to Speaking when audio is playing
-                setIsBubbleActive(true); // Activate bubble when teacher speaks
+                setStatusText('Speaking');
+                setIsBubbleActive(true);
 
                 audio.onended = () => {
-                    setIsBubbleActive(false); // Deactivate bubble when audio ends
-                    setStatusText(null)
+                    URL.revokeObjectURL(url);
+                    currentPlayingAudioRef.current = null;
+                    setIsBubbleActive(false);
+                    setStatusText(null);
                 };
             };
     
@@ -155,6 +169,13 @@ const WebSocketAudio: React.FC = () => {
             }
             setIsBubbleActive(false); // Deactivate bubble when leaving lesson
             setStatusText(null);
+            
+            // Stop any playing audio
+            if (currentPlayingAudioRef.current) {
+                currentPlayingAudioRef.current.pause();
+                URL.revokeObjectURL(currentPlayingAudioRef.current.src);
+                currentPlayingAudioRef.current = null;
+            }
         }
     };
 
