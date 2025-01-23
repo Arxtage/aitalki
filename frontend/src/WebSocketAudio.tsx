@@ -9,15 +9,19 @@ const API_URL = isProd ? 'aitalki.app' : 'localhost:8000';
 const SILENCE_DURATION = 1000; // ms of silence before sending audio
 
 const WebSocketAudio: React.FC = () => {
-    const [lessonActive, setlessonActive] = useState(false);
+    // Keep state for UI updates (useState is ASYNC so not instant updates)
+    const [lessonActive, setLessonActive] = useState(false);
     const [statusText, setStatusText] = useState<string | null>(null);
-    const [isBubbleActive, setIsBubbleActive] = useState(false); // State for bubble
+    const [isBubbleActive, setIsBubbleActive] = useState(false);
+    
+    // Refs for internal logic (Ref is for instant updates, but can not be used for UI updates)
+    const lessonActiveRef = useRef(false);
     const audioChunks = useRef<Blob[]>([]);
     const socketRef = useRef<WebSocket | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-    const mediaStreamRef = useRef<MediaStream | null>(null); // Reference to the media stream
-    const [token, setToken] = useState<string | undefined>(undefined);
+    const mediaStreamRef = useRef<MediaStream | null>(null);
     const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const [token, setToken] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         const retrievedToken = Cookies.get('jwt_token');
@@ -32,7 +36,7 @@ const WebSocketAudio: React.FC = () => {
     
             socketRef.current.onmessage = (event) => {
                 // Only play audio if lesson is active
-                if (!lessonActive) {
+                if (!lessonActiveRef.current) { // NOTE: lessonActiveRef is for internal logic
                     console.log('Ignoring teacher audio - lesson not active');
                     return;
                 }
@@ -127,16 +131,18 @@ const WebSocketAudio: React.FC = () => {
         }
     };
 
-    const toggleRecording = () => {
+    const startOrEndLesson = () => {
         if (!lessonActive) {
-            console.log('Toggle it is: !isRecording, Started Vad');
-            setlessonActive(true);
+            console.log('Start Lesson, Started Vad');
+            setLessonActive(true);  // For UI updates
+            lessonActiveRef.current = true;  // For internal logic
             setStatusText('Listening'); // Update status to Listening
             connectWebSocket(); // Connect WebSocket only when starting the lesson
             vad.start(); // Start VAD
         } else {
-            console.log('Toggle it isRecording, Paused Vad');
-            setlessonActive(false);
+            console.log('End Lesson, Paused Vad');
+            setLessonActive(false);  // For async UI updates
+            lessonActiveRef.current = false;  // For instant internal logic
             vad.pause();
             if (mediaRecorderRef.current) {
                 mediaRecorderRef.current.stop();
@@ -161,7 +167,7 @@ const WebSocketAudio: React.FC = () => {
             <div className="button-container">
                 <button 
                     className={`button ${lessonActive ? 'recording' : ''}`}
-                    onClick={toggleRecording}
+                    onClick={startOrEndLesson}
                 >
                     {lessonActive ? 'Leave Lesson' : 'Start Lesson'}
                 </button>
