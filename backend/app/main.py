@@ -19,8 +19,9 @@ import logging
 from app.services.gemini import call_gemini
 from app.services.text_to_speech import text_to_speech
 from app.utils.prompts import FIVE_MINUTES_LEFT_SIGNAL
-from app.database import engine, Base
+from app.database import engine, Base, get_db
 from app.models.user import User
+from sqlalchemy.orm import Session
 
 SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
 JWT_SECRET = os.environ.get('JWT_SECRET') or secrets.token_hex(32)
@@ -96,12 +97,12 @@ async def get_user(request: Request):
 
 @app.get("/api/login")
 async def login(request: Request):
-    logger.info(f'== Entered Login')
+    logger.info('== Entered Login')
     redirect_uri = request.url_for('auth')
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 @app.get('/api/auth')
-async def auth(request: Request):
+async def auth(request: Request, db: Session = Depends(get_db)):
     token = await oauth.google.authorize_access_token(request)
     user = token.get('userinfo')
     
@@ -111,6 +112,19 @@ async def auth(request: Request):
         if user_email not in ALLOWED_EMAILS:
             # Redirect to home with a query parameter
             return RedirectResponse(url=f"{API_URL}/?apply_for_beta=true")
+
+        # Add or update user in database
+        db_user = db.query(User).filter(User.email == user_email).first()
+        if db_user:
+            db_user.last_login = datetime.utcnow()
+        else:
+            db_user = User(
+                email=user_email,
+                username=user.get('name'),
+                last_login=datetime.utcnow()
+            )
+            db.add(db_user)
+        db.commit()
 
         request.session['user'] = dict(user)
         jwt_token = create_token(dict(user))
